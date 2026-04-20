@@ -1648,3 +1648,272 @@ a { color: inherit; text-decoration: none; }
   .nafe-cal__row > :nth-child(n+3) { grid-column: 2; }
   .nafe-cal__cells { grid-auto-rows: minmax(90px, auto); }
 }
+
+/* ======================================================
+   EMPTY STATES
+   ====================================================== */
+.nafe-empty {
+  border: 1px dashed rgba(255, 255, 255, 0.14);
+  background: rgba(11, 18, 40, 0.4);
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  border-radius: 0;
+}
+.nafe-empty--panel {
+  min-height: 200px;
+  justify-content: center;
+}
+.nafe-empty--card {
+  text-align: left;
+}
+.nafe-empty__text {
+  color: rgba(255, 255, 255, 0.55);
+  max-width: 520px;
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 0;
+}
+.nafe-empty__cta {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.8);
+  padding: 10px 16px;
+  cursor: pointer;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  transition: border-color 0.2s, color 0.2s;
+}
+.nafe-empty__cta:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* ======================================================
+   TROPHIES LIST (public side)
+   ====================================================== */
+.nafe-trophies {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.nafe-trophy {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 18px 24px;
+  background: rgba(15, 23, 41, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: border-color 0.3s;
+}
+.nafe-trophy:hover { border-color: rgba(var(--accent-rgb), 0.4); }
+.nafe-trophy__year { font-weight: 700; min-width: 60px; }
+.nafe-trophy__event { flex: 1; font-size: 18px; }
+.nafe-trophy__place {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+/* ======================================================
+   ADMIN CONSOLE
+   ====================================================== */
+.nafe-admin__toolbar {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.nafe-admin__tabs {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  margin-top: 32px;
+}
+.nafe-admin__tab {
+  background: rgba(11, 18, 40, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+.nafe-admin__tab:hover {
+  border-color: rgba(var(--accent-rgb), 0.5);
+  background: rgba(var(--accent-rgb), 0.08);
+}
+.nafe-admin__tabIcon { font-size: 24px; line-height: 1; }
+.nafe-admin__tabLabel { font-size: 18px; }
+.nafe-admin__tabCount {
+  font-size: 24px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.55);
+  margin-left: auto;
+  align-self: flex-end;
+}
+
+.nafe-admin__panel {
+  margin-top: 40px;
+}
+
+.nafe-admin__section {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+/* --- Form --- */
+.nafe-admin__form {
+  background: rgba(11, 18, 40, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.nafe-admin__formTitle {
+  font-size: 24px;
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+.nafe-admin__grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+.nafe-admin__formActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.nafe-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.nafe-field__label {
+  font-size: 10px;
+  letter-spacing: 0.25em;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+}
+.nafe-field input[type="text"],
+.nafe-field input[type="number"],
+.nafe-field input[type="date"],
+.nafe-field input[type="time"],
+.nafe-field input:not([type]),
+.nafe-field select,
+.nafe-field textarea {
+  background: #050814;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  padding: 10px 12px;
+  font-family: "Inter Tight", system-ui, sans-serif;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.nafe-field input:focus,
+.nafe-field select:focus,
+.nafe-field textarea:focus {
+  border-color: var(--accent);
+}
+.nafe-field textarea { resize: vertical; font-family: inherit; }
+.nafe-field__checkbox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.8);
+  padding: 10px 0;
+}
+.nafe-field__checkbox input { width: 18px; height: 18px; accent-color: var(--accent); }
+
+/* --- Table --- */
+.nafe-admin__table {
+  background: rgba(11, 18, 40, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.nafe-admin__tableHead {
+  display: flex;
+  gap: 16px;
+  padding: 14px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 10px;
+  letter-spacing: 0.25em;
+  color: rgba(255, 255, 255, 0.5);
+}
+.nafe-admin__tableRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  transition: background 0.15s;
+}
+.nafe-admin__tableRow:last-child { border-bottom: none; }
+.nafe-admin__tableRow:hover { background: rgba(var(--accent-rgb), 0.05); }
+.nafe-admin__tableCell {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.9);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.nafe-admin__tableActions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+.nafe-admin__iconBtn {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.7);
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 14px;
+}
+.nafe-admin__iconBtn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.nafe-admin__iconBtn--danger:hover {
+  border-color: #E53E3E;
+  color: #E53E3E;
+}
+
+.nafe-admin__empty {
+  padding: 60px 40px;
+  text-align: center;
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.5);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+}
+.nafe-admin__empty p { margin: 0; font-size: 14px; max-width: 480px; }
+
+/* Responsive admin */
+@media (max-width: 960px) {
+  .nafe-admin__tabs { grid-template-columns: repeat(2, 1fr); }
+  .nafe-admin__grid { grid-template-columns: repeat(2, 1fr); }
+  .nafe-admin__tableHead { display: none; }
+  .nafe-admin__tableRow { flex-direction: column; align-items: stretch; }
+  .nafe-admin__tableActions { justify-content: flex-start; }
+}

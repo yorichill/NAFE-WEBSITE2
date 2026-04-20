@@ -15,6 +15,7 @@
 <body>
   <div id="root"></div>
 
+  <script type="text/babel" src="src/store.jsx"></script>
   <script type="text/babel" src="src/data.jsx"></script>
   <script type="text/babel" src="src/shell.jsx"></script>
   <script type="text/babel" src="src/playercard.jsx"></script>
@@ -24,6 +25,7 @@
   <script type="text/babel" src="src/page-live.jsx"></script>
   <script type="text/babel" src="src/page-news.jsx"></script>
   <script type="text/babel" src="src/page-calendar.jsx"></script>
+  <script type="text/babel" src="src/page-admin.jsx"></script>
 
   <script type="text/babel" data-presets="env,react">
     const { useState, useEffect } = React;
@@ -88,6 +90,7 @@
       else if (route === "/live") Page = <window.LivePage accent={accent} />;
       else if (route === "/news") Page = <window.NewsPage accent={accent} />;
       else if (route === "/calendar") Page = <window.CalendarPage accent={accent} />;
+      else if (route.startsWith("/admin")) Page = <window.AdminPage accent={accent} />;
       else if (route === "/shop") Page = <ShopSoon accent={accent} />;
       else Page = <window.HubPage accent={accent} cardVariant={cardVariant} onNav={nav} />;
 

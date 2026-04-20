@@ -1,19 +1,24 @@
 // NAFE — Hub (home) page
 
 function HubPage({ accent, cardVariant, onNav }) {
-  const roster = window.TEAMS.valorant.roster;
-  const next = window.TEAMS.valorant.next;
+  window.store.useVersion();
+  const roster = window.store.getPlayersByTeam("valorant");
+  const live = window.store.getLiveMatch();
+  const trophies = window.store.trophies.list().length;
+
   return (
     <div className="nafe-page">
       {/* HERO — brutalist typographic wall */}
       <section className="nafe-hero">
         <div className="nafe-hero__meta">
           <span className="nafe-eyebrow" style={{ color: accent }}>
-            Saison 2026 · Valorant Champions Tour
+            Saison 2026 · NAFE TEAM
           </span>
-          <span className="nafe-eyebrow nafe-hero__ts">
-            <span className="nafe-pulse" /> EN DIRECT · JOUR 134
-          </span>
+          {live && (
+            <span className="nafe-eyebrow nafe-hero__ts">
+              <span className="nafe-pulse" /> EN DIRECT
+            </span>
+          )}
         </div>
 
         <h1 className="nafe-hero__title nafe-display">
@@ -28,53 +33,74 @@ function HubPage({ accent, cardVariant, onNav }) {
             affûtée du game. Nouvelle ère, même obsession&nbsp;: la victoire.
           </p>
 
-          <div className="nafe-hero__matchCard" onClick={() => onNav("#/live")}>
-            <div className="nafe-hero__matchHead">
-              <span className="nafe-mono" style={{ color: accent }}>● LIVE</span>
-              <span className="nafe-mono">VCT EMEA · MAP 2/3</span>
-            </div>
-            <div className="nafe-hero__matchBody">
-              <div className="nafe-hero__side">
-                <span className="nafe-mono">NAFE</span>
-                <span className="nafe-display nafe-hero__matchScore" style={{ color: accent }}>11</span>
+          {live ? (
+            <div className="nafe-hero__matchCard" onClick={() => onNav("#/live")}>
+              <div className="nafe-hero__matchHead">
+                <span className="nafe-mono" style={{ color: accent }}>● LIVE</span>
+                <span className="nafe-mono">{live.event}</span>
               </div>
-              <span className="nafe-mono nafe-hero__matchSep">—</span>
-              <div className="nafe-hero__side">
-                <span className="nafe-mono">{next.opp}</span>
-                <span className="nafe-display nafe-hero__matchScore">9</span>
+              <div className="nafe-hero__matchBody">
+                <div className="nafe-hero__side">
+                  <span className="nafe-mono">NAFE</span>
+                  <span className="nafe-display nafe-hero__matchScore" style={{ color: accent }}>
+                    {(live.result || "").split(/[-–]/)[0]?.trim() || "—"}
+                  </span>
+                </div>
+                <span className="nafe-mono nafe-hero__matchSep">—</span>
+                <div className="nafe-hero__side">
+                  <span className="nafe-mono">{live.opp}</span>
+                  <span className="nafe-display nafe-hero__matchScore">
+                    {(live.result || "").split(/[-–]/)[1]?.trim() || "—"}
+                  </span>
+                </div>
+              </div>
+              <div className="nafe-hero__matchFoot">
+                <span className="nafe-mono">{live.loc}</span>
+                <span className="nafe-mono">REGARDER →</span>
               </div>
             </div>
-            <div className="nafe-hero__matchFoot">
-              <span className="nafe-mono">{next.map}</span>
-              <span className="nafe-mono">REGARDER →</span>
+          ) : (
+            <div className="nafe-hero__matchCard nafe-empty nafe-empty--card">
+              <span className="nafe-mono" style={{ color: accent }}>AUCUN MATCH LIVE</span>
+              <p className="nafe-empty__text">
+                Programme un match depuis l'espace admin pour qu'il apparaisse ici en temps réel.
+              </p>
+              <button className="nafe-mono nafe-empty__cta" onClick={() => onNav("#/admin/matches")}>
+                → ADMIN MATCHS
+              </button>
             </div>
-          </div>
+          )}
         </div>
 
         <div className="nafe-hero__cta">
           <button className="nafe-btn nafe-btn--accent nafe-clip-card" style={{ background: accent }}>
             Rejoindre le club
           </button>
-          <button className="nafe-btn nafe-btn--ghost nafe-clip-card">
+          <button className="nafe-btn nafe-btn--ghost nafe-clip-card" onClick={() => onNav("#/calendar")}>
             Voir le planning
           </button>
           <div className="nafe-hero__stats">
             <div>
-              <p className="nafe-mono nafe-hero__statL">SUIVEURS</p>
-              <p className="nafe-display nafe-hero__statV">4.2M</p>
+              <p className="nafe-mono nafe-hero__statL">JOUEURS</p>
+              <p className="nafe-display nafe-hero__statV">
+                {String(window.store.players.list().length).padStart(2, "0")}
+              </p>
             </div>
             <div>
               <p className="nafe-mono nafe-hero__statL">TROPHÉES</p>
-              <p className="nafe-display nafe-hero__statV">27</p>
+              <p className="nafe-display nafe-hero__statV">
+                {String(trophies).padStart(2, "0")}
+              </p>
             </div>
             <div>
-              <p className="nafe-mono nafe-hero__statL">WIN RATE</p>
-              <p className="nafe-display nafe-hero__statV" style={{ color: accent }}>71%</p>
+              <p className="nafe-mono nafe-hero__statL">MATCHS PROG.</p>
+              <p className="nafe-display nafe-hero__statV" style={{ color: accent }}>
+                {String(window.store.matches.list().length).padStart(2, "0")}
+              </p>
             </div>
           </div>
         </div>
 
-        {/* Decorative side label */}
         <div className="nafe-hero__rail">
           <span className="nafe-mono">N/T · 01</span>
           <span className="nafe-mono">·</span>
@@ -102,11 +128,23 @@ function HubPage({ accent, cardVariant, onNav }) {
           </a>
         </header>
 
-        <div className={`nafe-roster nafe-roster--${cardVariant}`}>
-          {roster.map((p) => (
-            <window.PlayerCard key={p.tag} p={p} accent={accent} variant={cardVariant} />
-          ))}
-        </div>
+        {roster.length === 0 ? (
+          <div className="nafe-empty nafe-empty--panel">
+            <span className="nafe-mono" style={{ color: accent }}>ROSTER VIDE</span>
+            <p className="nafe-empty__text">
+              Aucun joueur enregistré pour Valorant. Ajoute des joueurs depuis l'espace admin.
+            </p>
+            <button className="nafe-btn nafe-btn--ghost" onClick={() => onNav("#/admin/players")}>
+              → Ajouter un joueur
+            </button>
+          </div>
+        ) : (
+          <div className={`nafe-roster nafe-roster--${cardVariant}`}>
+            {roster.map((p) => (
+              <window.PlayerCard key={p.id || p.tag} p={p} accent={accent} variant={cardVariant} />
+            ))}
+          </div>
+        )}
       </section>
 
       {/* Manifesto strip */}
@@ -131,7 +169,7 @@ function HubPage({ accent, cardVariant, onNav }) {
             <div>
               <span className="nafe-mono nafe-manifesto__num" style={{ color: accent }}>03 ·</span>
               <h3 className="nafe-display nafe-manifesto__h3">Vivre ensemble</h3>
-              <p>Un club de 200&#8239;000 membres actifs. Events physiques, loot tangible, hospitality en finale.</p>
+              <p>Un club de membres actifs. Events physiques, loot tangible, hospitality en finale.</p>
             </div>
           </div>
         </div>

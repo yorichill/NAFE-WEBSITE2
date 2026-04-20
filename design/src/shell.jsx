@@ -4,7 +4,10 @@ const { useState, useEffect, useRef } = React;
 
 // ========== ScoreTicker ==========
 function ScoreTicker() {
-  const doubled = [...window.SCORES, ...window.SCORES];
+  window.store.useVersion();
+  const scores = window.store.scores.list();
+  if (!scores.length) return null;
+  const doubled = [...scores, ...scores];
   return (
     <div className="nafe-ticker">
       <div className="nafe-ticker__track">
@@ -69,6 +72,13 @@ function Sidebar({ route, onNav }) {
     calendar: [{ label: "Mois & liste", href: "#/calendar" }],
     news: [{ label: "Dernières dépêches", href: "#/news" }],
     club: [{ label: "Dashboard", href: "#/club" }],
+    admin: [
+      { label: "Joueurs", href: "#/admin/players" },
+      { label: "Matchs & calendrier", href: "#/admin/matches" },
+      { label: "Actualités", href: "#/admin/news" },
+      { label: "Ticker scores", href: "#/admin/scores" },
+      { label: "Palmarès", href: "#/admin/trophies" },
+    ],
     shop: [{ label: "Bientôt", href: "#/shop" }],
   };
 
