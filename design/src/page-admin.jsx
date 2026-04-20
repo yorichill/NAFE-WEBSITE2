@@ -248,7 +248,10 @@ function PlayersAdmin({ accent }) {
     return { team: "valorant", subteam: "", name: "", tag: "", role: "Duelist", jersey: 1, country: "FR", kd: 0, hs: 0, acs: 0, gear: { mouse: "", keyboard: "", headset: "" } };
   }
 
-  const subteamsForDraft = window.store.getSubteamsByTeam(draft.team);
+  // Sous-équipes : d'abord celles du jeu sélectionné, puis les autres en fallback
+  const allSubteams      = window.store.subteams.list();
+  const subteamsForTeam  = allSubteams.filter((s) => s.parent === draft.team);
+  const subteamsOther    = allSubteams.filter((s) => s.parent !== draft.team);
 
   function startEdit(p) {
     setEditing(p.id);
@@ -277,19 +280,30 @@ function PlayersAdmin({ accent }) {
         submitLabel={editing ? "Mettre à jour" : "Ajouter le joueur"}
         accent={accent}
       >
-        <Field label="Équipe">
+        <Field label="Équipe" span={2}>
           <select value={draft.team} onChange={(e) => setDraft({ ...draft, team: e.target.value, subteam: "" })}>
             {Object.entries(window.TEAMS_META).map(([k, t]) => (
               <option key={k} value={k}>{t.game}</option>
             ))}
           </select>
         </Field>
-        <Field label="Sous-équipe">
+        <Field label="Sous-équipe" span={2}>
           <select value={draft.subteam || ""} onChange={(e) => setDraft({ ...draft, subteam: e.target.value })}>
             <option value="">— Aucune —</option>
-            {subteamsForDraft.map((st) => (
-              <option key={st.id} value={st.id}>{st.name}</option>
-            ))}
+            {subteamsForTeam.length > 0 ? (
+              subteamsForTeam.map((st) => (
+                <option key={st.id} value={st.id}>{st.name}</option>
+              ))
+            ) : subteamsOther.length > 0 ? (
+              <>
+                <option disabled>── Autres jeux ──</option>
+                {subteamsOther.map((st) => (
+                  <option key={st.id} value={st.id}>
+                    [{window.TEAMS_META[st.parent]?.game || st.parent}] {st.name}
+                  </option>
+                ))}
+              </>
+            ) : null}
           </select>
         </Field>
         <Field label="Numéro">
