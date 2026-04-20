@@ -25,8 +25,82 @@ function ScoreTicker() {
   );
 }
 
+// ========== UserPill (header right side) ==========
+function UserPill({ onLogin, onRegister, onNav, accent }) {
+  window.store.useVersion();
+  const user = window.store.currentUser();
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    const close = (e) => {
+      if (!e.target.closest?.(".nafe-userPill")) setOpen(false);
+    };
+    window.addEventListener("click", close);
+    return () => window.removeEventListener("click", close);
+  }, [open]);
+
+  if (!user) {
+    return (
+      <div className="nafe-auth">
+        <button className="nafe-btn nafe-btn--ghost nafe-btn--sm" onClick={onLogin}>
+          Se connecter
+        </button>
+        <button
+          className="nafe-btn nafe-btn--accent nafe-btn--sm"
+          style={{ background: accent }}
+          onClick={onRegister}
+        >
+          S'inscrire
+        </button>
+      </div>
+    );
+  }
+
+  const isAdmin = user.role === "admin";
+  const initial = (user.username || user.email)[0]?.toUpperCase() || "?";
+
+  return (
+    <div className="nafe-userPill">
+      <button className="nafe-userPill__btn" onClick={() => setOpen((o) => !o)}>
+        <span
+          className="nafe-userPill__avatar"
+          style={{ background: isAdmin ? accent : "rgba(255,255,255,0.08)", color: isAdmin ? "#fff" : "rgba(255,255,255,0.85)" }}
+        >
+          {initial}
+        </span>
+        <span className="nafe-userPill__meta">
+          <span className="nafe-userPill__name">{user.username}</span>
+          <span className="nafe-mono nafe-userPill__role" style={{ color: isAdmin ? accent : "rgba(255,255,255,0.5)" }}>
+            {isAdmin ? "ADMIN" : `FAN · ${user.xp || 0} XP`}
+          </span>
+        </span>
+        <span className="nafe-userPill__chevron">▾</span>
+      </button>
+      {open && (
+        <div className="nafe-userPill__menu nafe-clip-card">
+          <a href="#/club" onClick={(e) => { e.preventDefault(); onNav("#/club"); setOpen(false); }}>
+            Mon dashboard
+          </a>
+          {isAdmin && (
+            <a href="#/admin" onClick={(e) => { e.preventDefault(); onNav("#/admin"); setOpen(false); }}>
+              Console admin
+            </a>
+          )}
+          <button
+            className="nafe-userPill__logout"
+            onClick={() => { window.store.logout(); setOpen(false); }}
+          >
+            Déconnexion
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ========== StickyHeader ==========
-function StickyHeader({ route, onNav }) {
+function StickyHeader({ route, onNav, onLogin, onRegister, accent }) {
   const [shrunk, setShrunk] = useState(false);
   useEffect(() => {
     const scroller = document.querySelector(".nafe-main");
@@ -51,7 +125,7 @@ function StickyHeader({ route, onNav }) {
            className={route === "/news" ? "is-active" : ""}>Actu</a>
         <a href="#/club" onClick={(e) => { e.preventDefault(); onNav("#/club"); }}
            className={route === "/club" ? "is-active" : ""}>Club</a>
-        <button className="nafe-btn nafe-btn--accent nafe-btn--sm">S'inscrire</button>
+        <UserPill onLogin={onLogin} onRegister={onRegister} onNav={onNav} accent={accent} />
       </nav>
     </header>
   );
@@ -59,7 +133,9 @@ function StickyHeader({ route, onNav }) {
 
 // ========== Sidebar ==========
 function Sidebar({ route, onNav }) {
+  window.store.useVersion();
   const [hover, setHover] = useState(null);
+  const isAdmin = window.store.isAdmin();
 
   const sections = {
     home: [{ label: "Accueil", href: "#/" }],
@@ -74,20 +150,26 @@ function Sidebar({ route, onNav }) {
     club: [{ label: "Dashboard", href: "#/club" }],
     admin: [
       { label: "Joueurs", href: "#/admin/players" },
+      { label: "Sous-équipes", href: "#/admin/subteams" },
       { label: "Matchs & calendrier", href: "#/admin/matches" },
       { label: "Actualités", href: "#/admin/news" },
       { label: "Ticker scores", href: "#/admin/scores" },
       { label: "Palmarès", href: "#/admin/trophies" },
+      { label: "Utilisateurs", href: "#/admin/users" },
     ],
     shop: [{ label: "Bientôt", href: "#/shop" }],
   };
 
+  // Filtre la nav : l'onglet admin n'apparaît que pour les admins
+  const items = window.NAV.filter((n) => n.key !== "admin" || isAdmin);
+
   return (
     <aside className="nafe-sidebar">
       <div className="nafe-sidebar__mark">N</div>
-      {window.NAV.map((item) => {
+      {items.map((item) => {
         const active =
           (item.key === "teams" && route.startsWith("/teams")) ||
+          (item.key === "admin" && route.startsWith("/admin")) ||
           (item.key === "home" && route === "/") ||
           (item.key === item.key && route === `/${item.key}`);
         return (
@@ -107,7 +189,7 @@ function Sidebar({ route, onNav }) {
             {hover === item.key && (
               <div className="nafe-sidebar__flyout">
                 <span className="nafe-sidebar__flyoutLabel">{item.label}</span>
-                {sections[item.key].map((s) => (
+                {(sections[item.key] || []).map((s) => (
                   <a
                     key={s.label}
                     href={s.href}
@@ -130,4 +212,4 @@ function Sidebar({ route, onNav }) {
   );
 }
 
-Object.assign(window, { ScoreTicker, StickyHeader, Sidebar });
+Object.assign(window, { ScoreTicker, StickyHeader, Sidebar, UserPill });

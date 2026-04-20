@@ -4,11 +4,14 @@
 
 (function () {
   const KEYS = {
-    players: "nafe:players",
-    matches: "nafe:matches",
-    news:    "nafe:news",
-    scores:  "nafe:scores",
-    trophies:"nafe:trophies",
+    players:  "nafe:players",
+    matches:  "nafe:matches",
+    news:     "nafe:news",
+    scores:   "nafe:scores",
+    trophies: "nafe:trophies",
+    subteams: "nafe:subteams",
+    users:    "nafe:users",
+    session:  "nafe:session",
   };
 
   const uid = (p) =>
@@ -61,6 +64,26 @@
   const news     = crud(KEYS.news,     "nw");
   const scores   = crud(KEYS.scores,   "sc");
   const trophies = crud(KEYS.trophies, "tr");
+  const subteams = crud(KEYS.subteams, "st");
+  const users    = crud(KEYS.users,    "us");
+
+  // --- Session (single object, not a list) ---
+  const session = {
+    get: () => {
+      try {
+        const raw = localStorage.getItem(KEYS.session);
+        return raw ? JSON.parse(raw) : null;
+      } catch {
+        return null;
+      }
+    },
+    set: (val) => {
+      if (val === null) localStorage.removeItem(KEYS.session);
+      else localStorage.setItem(KEYS.session, JSON.stringify(val));
+      window.dispatchEvent(new CustomEvent("store:update", { detail: { key: KEYS.session } }));
+    },
+    clear: () => session.set(null),
+  };
 
   const store = {
     KEYS,
@@ -70,13 +93,73 @@
     news,
     scores,
     trophies,
+    subteams,
+    users,
+    session,
 
     // --- queries croisées utilisées par les pages publiques ---
-    getPlayersByTeam: (team) =>
-      players.list().filter((p) => p.team === team),
+    getPlayersByTeam: (team, subteamId) => {
+      const all = players.list().filter((p) => p.team === team);
+      if (subteamId === undefined) return all;
+      if (subteamId === null || subteamId === "") return all.filter((p) => !p.subteam);
+      return all.filter((p) => p.subteam === subteamId);
+    },
+
+    getSubteamsByTeam: (team) =>
+      subteams.list().filter((s) => s.parent === team),
 
     getTrophiesByTeam: (team) =>
       trophies.list().filter((t) => t.team === team),
+
+    // --- Auth helpers ---
+    currentUser: () => {
+      const s = session.get();
+      if (!s) return null;
+      return users.list().find((u) => u.id === s.userId) || null;
+    },
+
+    isAdmin: () => {
+      const u = store.currentUser && store.currentUser();
+      return !!(u && u.role === "admin");
+    },
+
+    register: ({ email, username, password }) => {
+      const list = users.list();
+      if (list.find((u) => u.email.toLowerCase() === email.toLowerCase())) {
+        throw new Error("Un compte existe déjà avec cet email.");
+      }
+      if (list.find((u) => u.username.toLowerCase() === username.toLowerCase())) {
+        throw new Error("Ce nom d'utilisateur est déjà pris.");
+      }
+      // Premier compte enregistré → admin automatique (bootstrap)
+      const role = list.length === 0 ? "admin" : "user";
+      const user = users.add({
+        email: email.trim(),
+        username: username.trim(),
+        // NOTE : hash volontairement simpliste (prototype local, pas de backend).
+        // À remplacer par un vrai hash côté serveur quand on brancha Supabase/Next API.
+        passwordHash: btoa(unescape(encodeURIComponent(password))),
+        role,
+        xp: 0,
+      });
+      session.set({ userId: user.id });
+      return user;
+    },
+
+    login: ({ email, password }) => {
+      const hash = btoa(unescape(encodeURIComponent(password)));
+      const user = users.list().find(
+        (u) => u.email.toLowerCase() === email.toLowerCase() && u.passwordHash === hash
+      );
+      if (!user) throw new Error("Email ou mot de passe incorrect.");
+      session.set({ userId: user.id });
+      return user;
+    },
+
+    logout: () => session.clear(),
+
+    promoteToAdmin: (id) => users.update(id, { role: "admin" }),
+    demoteToUser:   (id) => users.update(id, { role: "user" }),
 
     getLiveMatch: () =>
       matches.list().find((m) => m.status === "live"),

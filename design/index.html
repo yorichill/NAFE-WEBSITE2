@@ -26,6 +26,7 @@
   <script type="text/babel" src="src/page-news.jsx"></script>
   <script type="text/babel" src="src/page-calendar.jsx"></script>
   <script type="text/babel" src="src/page-admin.jsx"></script>
+  <script type="text/babel" src="src/auth-modal.jsx"></script>
 
   <script type="text/babel" data-presets="env,react">
     const { useState, useEffect } = React;
@@ -53,6 +54,7 @@
       const [route, setRoute] = useState(parseRoute());
       const [accent, setAccent] = useState(TWEAK_DEFAULTS.accent);
       const [cardVariant, setCardVariant] = useState(TWEAK_DEFAULTS.cardVariant);
+      const [authOpen, setAuthOpen] = useState(null); // null | "login" | "register"
 
       useEffect(() => {
         const onHash = () => setRoute(parseRoute());
@@ -62,6 +64,12 @@
           location.hash = saved;
         }
         return () => window.removeEventListener("hashchange", onHash);
+      }, []);
+
+      useEffect(() => {
+        window.openAuth  = (mode) => setAuthOpen(mode === "register" ? "register" : "login");
+        window.closeAuth = () => setAuthOpen(null);
+        return () => { delete window.openAuth; delete window.closeAuth; };
       }, []);
 
       useEffect(() => {
@@ -100,10 +108,23 @@
           <div className="nafe-ambient nafe-ambient--2" />
           <window.ScoreTicker />
           <window.Sidebar route={route} onNav={nav} />
-          <window.StickyHeader route={route} onNav={nav} />
+          <window.StickyHeader
+            route={route}
+            onNav={nav}
+            accent={accent}
+            onLogin={() => setAuthOpen("login")}
+            onRegister={() => setAuthOpen("register")}
+          />
           <main className="nafe-main">
             {Page}
           </main>
+          {authOpen && (
+            <window.AuthModal
+              accent={accent}
+              mode={authOpen}
+              onClose={() => setAuthOpen(null)}
+            />
+          )}
           <div className="nafe-scanlines" />
           <div className="nafe-grain" />
         </div>

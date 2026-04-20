@@ -4,11 +4,13 @@
 const { useState: useAdminState, useEffect: useAdminEffect } = React;
 
 const ADMIN_TABS = [
-  { k: "players",  label: "Joueurs",           icon: "👤" },
+  { k: "players",  label: "Joueurs",             icon: "👤" },
+  { k: "subteams", label: "Sous-équipes",        icon: "◈" },
   { k: "matches",  label: "Matchs & calendrier", icon: "📅" },
-  { k: "news",     label: "Actualités",        icon: "📰" },
-  { k: "scores",   label: "Ticker scores",     icon: "📊" },
-  { k: "trophies", label: "Palmarès",          icon: "🏆" },
+  { k: "news",     label: "Actualités",          icon: "📰" },
+  { k: "scores",   label: "Ticker scores",       icon: "📊" },
+  { k: "trophies", label: "Palmarès",            icon: "🏆" },
+  { k: "users",    label: "Utilisateurs",        icon: "👥" },
 ];
 
 // Route helper : renvoie la sous-page courante depuis le hash
@@ -28,12 +30,52 @@ function AdminPage({ accent }) {
     return () => window.removeEventListener("hashchange", onHash);
   }, []);
 
+  // ---- Guard : seuls les admins connectés accèdent à la console ----
+  const user = window.store.currentUser();
+  if (!user) {
+    return (
+      <div className="nafe-page">
+        <div className="nafe-empty nafe-empty--panel" style={{ marginTop: 80 }}>
+          <span className="nafe-mono" style={{ color: accent }}>ACCÈS RESTREINT</span>
+          <p className="nafe-empty__text">
+            La console admin est réservée au staff NAFE. Connecte-toi avec un compte admin
+            pour continuer.
+          </p>
+          <button
+            className="nafe-btn nafe-btn--accent"
+            style={{ background: accent }}
+            onClick={() => window.openAuth && window.openAuth("login")}
+          >
+            Se connecter
+          </button>
+        </div>
+      </div>
+    );
+  }
+  if (user.role !== "admin") {
+    return (
+      <div className="nafe-page">
+        <div className="nafe-empty nafe-empty--panel" style={{ marginTop: 80 }}>
+          <span className="nafe-mono" style={{ color: "#E53E3E" }}>ACCÈS REFUSÉ</span>
+          <p className="nafe-empty__text">
+            Tu es connecté en tant que <strong>{user.username}</strong> (rôle : fan).
+            Cette console est réservée au staff. Un admin peut te promouvoir depuis
+            l'onglet Utilisateurs.
+          </p>
+          <a className="nafe-btn nafe-btn--ghost" href="#/club">← Retour au dashboard</a>
+        </div>
+      </div>
+    );
+  }
+
   const counts = {
-    players: window.store.players.list().length,
-    matches: window.store.matches.list().length,
-    news: window.store.news.list().length,
-    scores: window.store.scores.list().length,
+    players:  window.store.players.list().length,
+    subteams: window.store.subteams.list().length,
+    matches:  window.store.matches.list().length,
+    news:     window.store.news.list().length,
+    scores:   window.store.scores.list().length,
     trophies: window.store.trophies.list().length,
+    users:    window.store.users.list().length,
   };
 
   return (
@@ -95,10 +137,12 @@ function AdminPage({ accent }) {
 
       <section className="nafe-admin__panel">
         {tab === "players"  && <PlayersAdmin  accent={accent} />}
+        {tab === "subteams" && <SubteamsAdmin accent={accent} />}
         {tab === "matches"  && <MatchesAdmin  accent={accent} />}
         {tab === "news"     && <NewsAdmin     accent={accent} />}
         {tab === "scores"   && <ScoresAdmin   accent={accent} />}
         {tab === "trophies" && <TrophiesAdmin accent={accent} />}
+        {tab === "users"    && <UsersAdmin    accent={accent} currentUser={user} />}
       </section>
     </div>
   );
@@ -189,8 +233,10 @@ function PlayersAdmin({ accent }) {
   const [draft, setDraft] = useAdminState(emptyPlayer());
 
   function emptyPlayer() {
-    return { team: "valorant", name: "", tag: "", role: "Duelist", jersey: 1, country: "FR", kd: 0, hs: 0, acs: 0, gear: { mouse: "", keyboard: "", headset: "" } };
+    return { team: "valorant", subteam: "", name: "", tag: "", role: "Duelist", jersey: 1, country: "FR", kd: 0, hs: 0, acs: 0, gear: { mouse: "", keyboard: "", headset: "" } };
   }
+
+  const subteamsForDraft = window.store.getSubteamsByTeam(draft.team);
 
   function startEdit(p) {
     setEditing(p.id);
@@ -220,9 +266,17 @@ function PlayersAdmin({ accent }) {
         accent={accent}
       >
         <Field label="Équipe">
-          <select value={draft.team} onChange={(e) => setDraft({ ...draft, team: e.target.value })}>
+          <select value={draft.team} onChange={(e) => setDraft({ ...draft, team: e.target.value, subteam: "" })}>
             {Object.entries(window.TEAMS_META).map(([k, t]) => (
               <option key={k} value={k}>{t.game}</option>
+            ))}
+          </select>
+        </Field>
+        <Field label="Sous-équipe">
+          <select value={draft.subteam || ""} onChange={(e) => setDraft({ ...draft, subteam: e.target.value })}>
+            <option value="">— Aucune —</option>
+            {subteamsForDraft.map((st) => (
+              <option key={st.id} value={st.id}>{st.name}</option>
             ))}
           </select>
         </Field>
@@ -272,6 +326,17 @@ function PlayersAdmin({ accent }) {
           { key: "name", label: "NOM", flex: 1 },
           { key: "tag", label: "PSEUDO", flex: 1, render: (r) => `@${r.tag}` },
           { key: "team", label: "ÉQUIPE", flex: 1, render: (r) => window.TEAMS_META[r.team]?.game || r.team },
+          { key: "subteam", label: "SOUS-ÉQUIPE", flex: 0.9, render: (r) => {
+            if (!r.subteam) return "—";
+            const st = window.store.subteams.get(r.subteam);
+            if (!st) return "—";
+            return (
+              <span>
+                <span style={{ display: "inline-block", width: 8, height: 8, background: st.color, marginRight: 6, verticalAlign: "middle" }} />
+                {st.name}
+              </span>
+            );
+          }},
           { key: "role", label: "RÔLE", flex: 0.7 },
           { key: "country", label: "PAYS", flex: 0.4 },
           { key: "kd", label: "K/D", flex: 0.4 },
@@ -608,6 +673,188 @@ function TrophiesAdmin({ accent }) {
         rows={list}
         onEdit={startEdit}
         onDelete={(id) => window.store.trophies.remove(id)}
+      />
+    </div>
+  );
+}
+
+// ============================================================
+//  Sub-teams
+// ============================================================
+function SubteamsAdmin({ accent }) {
+  const list = window.store.subteams.list();
+  const [editing, setEditing] = useAdminState(null);
+  const [team, setTeam] = useAdminState("valorant");
+  const [draft, setDraft] = useAdminState(emptySubteam("valorant"));
+
+  function emptySubteam(parent) {
+    const base = window.TEAMS_META[parent]?.color || "#1E4FD8";
+    const siblings = window.store.getSubteamsByTeam(parent);
+    const palette = window.tintPalette(base, 8);
+    // Pioche la prochaine teinte non déjà prise
+    const taken = new Set(siblings.map((s) => (s.color || "").toLowerCase()));
+    const next = palette.find((c) => !taken.has(c.toLowerCase())) || palette[siblings.length % palette.length];
+    return { parent, name: "", color: next };
+  }
+
+  function startEdit(st) {
+    setEditing(st.id);
+    setTeam(st.parent);
+    setDraft({ ...emptySubteam(st.parent), ...st });
+  }
+
+  function submit() {
+    if (!draft.name.trim()) return alert("Nom de sous-équipe requis");
+    const payload = { ...draft, parent: team };
+    if (editing) window.store.subteams.update(editing, payload);
+    else window.store.subteams.add(payload);
+    setEditing(null);
+    setDraft(emptySubteam(team));
+  }
+
+  const palette = window.tintPalette(window.TEAMS_META[team]?.color || accent, 8);
+  const filtered = list.filter((s) => s.parent === team);
+
+  return (
+    <div className="nafe-admin__section">
+      <div className="nafe-admin__filter">
+        <span className="nafe-mono nafe-field__label">ÉQUIPE PARENTE</span>
+        <div className="nafe-admin__filterBtns">
+          {Object.entries(window.TEAMS_META).map(([k, t]) => (
+            <button
+              key={k}
+              className={`nafe-news__chip ${team === k ? "is-active" : ""}`}
+              style={team === k ? { background: t.color, color: "#fff", borderColor: t.color } : { borderColor: `${t.color}55`, color: t.color }}
+              onClick={() => { setTeam(k); setDraft(emptySubteam(k)); setEditing(null); }}
+            >
+              <span className="nafe-mono">{t.game}</span>
+              <span className="nafe-news__chipN nafe-mono">
+                {list.filter((s) => s.parent === k).length}
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <FormShell
+        title={editing ? "Modifier la sous-équipe" : `Nouvelle sous-équipe · ${window.TEAMS_META[team]?.game}`}
+        onSubmit={submit}
+        onCancel={editing ? () => { setEditing(null); setDraft(emptySubteam(team)); } : null}
+        submitLabel={editing ? "Mettre à jour" : "Créer la sous-équipe"}
+        accent={accent}
+      >
+        <Field label="Nom" span={2}>
+          <input value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })}
+                 placeholder="Ex: Main, Academy, Female, Challengers..." />
+        </Field>
+        <Field label="Couleur (hex)">
+          <input value={draft.color} onChange={(e) => setDraft({ ...draft, color: e.target.value })}
+                 placeholder="#FF4655" />
+        </Field>
+        <Field label="Aperçu">
+          <div className="nafe-admin__colorPreview" style={{ background: draft.color, borderColor: draft.color }}>
+            <span className="nafe-mono">{draft.color.toUpperCase()}</span>
+          </div>
+        </Field>
+        <Field label="Teintes suggérées (dérivées de la couleur du jeu)" span={4}>
+          <div className="nafe-admin__swatches">
+            {palette.map((c) => (
+              <button
+                type="button"
+                key={c}
+                className={`nafe-admin__swatch ${draft.color.toLowerCase() === c.toLowerCase() ? "is-active" : ""}`}
+                style={{ background: c, borderColor: draft.color.toLowerCase() === c.toLowerCase() ? "#fff" : "transparent" }}
+                onClick={() => setDraft({ ...draft, color: c })}
+                title={c}
+              />
+            ))}
+          </div>
+        </Field>
+      </FormShell>
+
+      <DataTable
+        accent={accent}
+        empty={`Aucune sous-équipe pour ${window.TEAMS_META[team]?.game}. Crée la première ci-dessus.`}
+        columns={[
+          { key: "color", label: "TEINTE", flex: 0.4, render: (r) => (
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+              <span style={{ display: "inline-block", width: 20, height: 20, background: r.color, border: "1px solid rgba(255,255,255,0.15)" }} />
+              <span className="nafe-mono" style={{ fontSize: 11 }}>{r.color}</span>
+            </span>
+          )},
+          { key: "name", label: "NOM", flex: 1.2 },
+          { key: "parent", label: "PARENT", flex: 0.8, render: (r) => window.TEAMS_META[r.parent]?.game || r.parent },
+          { key: "count", label: "JOUEURS", flex: 0.5, render: (r) => window.store.getPlayersByTeam(r.parent, r.id).length },
+        ]}
+        rows={filtered}
+        onEdit={startEdit}
+        onDelete={(id) => {
+          // détache les joueurs rattachés avant suppression
+          window.store.players.list()
+            .filter((p) => p.subteam === id)
+            .forEach((p) => window.store.players.update(p.id, { subteam: "" }));
+          window.store.subteams.remove(id);
+        }}
+      />
+    </div>
+  );
+}
+
+// ============================================================
+//  Users
+// ============================================================
+function UsersAdmin({ accent, currentUser }) {
+  const list = window.store.users.list()
+    .slice()
+    .sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+
+  return (
+    <div className="nafe-admin__section">
+      <div className="nafe-admin__note">
+        <span className="nafe-mono" style={{ color: accent }}>ⓘ INFO</span>
+        <p>
+          Tu vois ici tous les comptes créés sur ce navigateur. Le premier compte enregistré
+          a automatiquement le rôle <strong>admin</strong>. Tu peux promouvoir/rétrograder
+          les autres, ou supprimer un compte (sauf le tien).
+        </p>
+      </div>
+
+      <DataTable
+        accent={accent}
+        empty="Aucun utilisateur."
+        columns={[
+          { key: "username", label: "PSEUDO", flex: 1 },
+          { key: "email", label: "EMAIL", flex: 1.4 },
+          { key: "role", label: "RÔLE", flex: 0.5, render: (r) => (
+            <span className="nafe-mono" style={{ color: r.role === "admin" ? accent : "rgba(255,255,255,0.6)" }}>
+              {r.role === "admin" ? "ADMIN" : "FAN"}
+            </span>
+          )},
+          { key: "xp", label: "XP", flex: 0.4, render: (r) => r.xp || 0 },
+          { key: "createdAt", label: "INSCRIT LE", flex: 0.8, render: (r) =>
+            r.createdAt ? new Date(r.createdAt).toLocaleDateString("fr-FR") : "—"
+          },
+          { key: "actions2", label: "RÔLE ACTION", flex: 0.9, render: (r) =>
+            r.id === currentUser.id ? (
+              <span className="nafe-mono" style={{ color: "rgba(255,255,255,0.4)" }}>(toi)</span>
+            ) : r.role === "admin" ? (
+              <button className="nafe-admin__iconBtn" onClick={() => window.store.demoteToUser(r.id)}>
+                Rétrograder
+              </button>
+            ) : (
+              <button className="nafe-admin__iconBtn" style={{ borderColor: accent, color: accent }}
+                      onClick={() => window.store.promoteToAdmin(r.id)}>
+                Promouvoir admin
+              </button>
+            )
+          },
+        ]}
+        rows={list}
+        onEdit={() => alert("Édition manuelle désactivée — utilise les boutons de rôle.")}
+        onDelete={(id) => {
+          if (id === currentUser.id) return alert("Tu ne peux pas supprimer ton propre compte.");
+          window.store.users.remove(id);
+        }}
       />
     </div>
   );

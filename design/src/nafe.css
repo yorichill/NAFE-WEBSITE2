@@ -1917,3 +1917,389 @@ a { color: inherit; text-decoration: none; }
   .nafe-admin__tableRow { flex-direction: column; align-items: stretch; }
   .nafe-admin__tableActions { justify-content: flex-start; }
 }
+
+/* ================================================================
+   AUTH + USER PILL + SUB-TEAM CHIPS + ADMIN EXTRAS
+   ================================================================ */
+
+/* Auth buttons container (right of header nav) */
+.nafe-auth {
+  display: inline-flex;
+  gap: 8px;
+  margin-left: 12px;
+}
+
+/* ---- User Pill (logged-in state) ---- */
+.nafe-userPill {
+  position: relative;
+  margin-left: 12px;
+}
+.nafe-userPill__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 10px 6px 6px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+  font-family: inherit;
+}
+.nafe-userPill__btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+.nafe-userPill__avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.02em;
+}
+.nafe-userPill__meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.1;
+}
+.nafe-userPill__name {
+  font-size: 13px;
+  font-weight: 600;
+}
+.nafe-userPill__role {
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.nafe-userPill__chevron {
+  font-size: 10px;
+  opacity: 0.6;
+  margin-right: 4px;
+}
+.nafe-userPill__menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 220px;
+  background: rgba(15, 15, 20, 0.98);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  z-index: 80;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+}
+.nafe-userPill__menu a,
+.nafe-userPill__logout {
+  display: block;
+  padding: 10px 12px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.85);
+  background: transparent;
+  border: none;
+  text-align: left;
+  font-family: inherit;
+  cursor: pointer;
+  text-decoration: none;
+  border-radius: 4px;
+  transition: background 0.15s;
+}
+.nafe-userPill__menu a:hover,
+.nafe-userPill__logout:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+}
+.nafe-userPill__logout {
+  color: #ff7a85;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  margin-top: 4px;
+  padding-top: 12px;
+  width: 100%;
+}
+
+/* ---- Auth Modal ---- */
+.nafe-modal__backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 5, 10, 0.78);
+  backdrop-filter: blur(6px);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: nafe-fade 0.2s ease-out;
+}
+@keyframes nafe-fade { from { opacity: 0; } to { opacity: 1; } }
+.nafe-modal {
+  position: relative;
+  width: 100%;
+  max-width: 440px;
+  background: rgba(18, 18, 24, 0.98);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 36px 32px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  animation: nafe-slideup 0.25s ease-out;
+}
+@keyframes nafe-slideup {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.nafe-modal__close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, color 0.15s;
+}
+.nafe-modal__close:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+.nafe-modal__tabs {
+  display: flex;
+  gap: 4px;
+  margin-top: 4px;
+}
+.nafe-modal__tab {
+  flex: 1;
+  padding: 10px 12px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  transition: color 0.15s, border-color 0.15s;
+}
+.nafe-modal__tab.is-active {
+  background: rgba(255, 255, 255, 0.04);
+}
+.nafe-modal__title {
+  font-size: 40px;
+  line-height: 0.95;
+  margin: 4px 0 0;
+}
+.nafe-modal__lede {
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 0;
+}
+.nafe-modal__form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 4px;
+}
+.nafe-modal__form .nafe-field { display: flex; flex-direction: column; gap: 6px; }
+.nafe-modal__form .nafe-field__label {
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+}
+.nafe-modal__form input {
+  padding: 11px 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-size: 14px;
+  font-family: inherit;
+  transition: border-color 0.15s, background 0.15s;
+}
+.nafe-modal__form input:focus {
+  outline: none;
+  border-color: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.06);
+}
+.nafe-modal__form .nafe-btn--accent {
+  margin-top: 6px;
+  padding: 13px 18px;
+  font-size: 13px;
+  letter-spacing: 0.1em;
+}
+.nafe-modal__error {
+  margin: 0;
+  padding: 10px 12px;
+  background: rgba(229, 62, 62, 0.12);
+  border: 1px solid rgba(229, 62, 62, 0.35);
+  color: #ff9ca5;
+  font-size: 12px;
+  line-height: 1.4;
+}
+.nafe-modal__switch {
+  text-align: center;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.55);
+  margin: 4px 0 0;
+}
+.nafe-modal__switch a { color: #fff; text-decoration: underline; }
+.nafe-modal__disclaimer {
+  text-align: center;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.35);
+  margin: 6px 0 0;
+}
+
+/* ---- Sub-team chips ---- */
+.nafe-subteams {
+  margin-top: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.nafe-subteams__label {
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  color: rgba(255, 255, 255, 0.45);
+}
+.nafe-subteams__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.nafe-subteam {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  transition: transform 0.15s, background 0.15s;
+}
+.nafe-subteam:hover { transform: translateY(-1px); }
+.nafe-subteam.is-active { font-weight: 600; }
+.nafe-subteam__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.nafe-subteam__count {
+  font-size: 9px;
+  padding: 2px 6px;
+  background: rgba(0, 0, 0, 0.35);
+  border-radius: 999px;
+  opacity: 0.8;
+}
+
+/* ---- Admin: color picker + swatches + filter + note ---- */
+.nafe-admin__colorRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.nafe-admin__colorPreview {
+  width: 36px;
+  height: 36px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  flex-shrink: 0;
+}
+.nafe-admin__swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+.nafe-admin__swatch {
+  width: 24px;
+  height: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.15s, border-color 0.15s;
+}
+.nafe-admin__swatch:hover { transform: scale(1.1); border-color: rgba(255, 255, 255, 0.5); }
+.nafe-admin__swatch.is-active { border: 2px solid #fff; }
+
+.nafe-admin__filter {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+.nafe-admin__filterLabel {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: rgba(255, 255, 255, 0.45);
+}
+.nafe-admin__filterBtns {
+  display: inline-flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.nafe-admin__filterBtn {
+  padding: 6px 12px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.7);
+  font-family: inherit;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.nafe-admin__filterBtn:hover { color: #fff; }
+.nafe-admin__filterBtn.is-active { color: #fff; font-weight: 600; }
+
+.nafe-admin__note {
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 12px;
+  line-height: 1.5;
+  margin-bottom: 14px;
+}
+.nafe-admin__note strong { color: #fff; }
+
+/* Inline subteam tag in tables */
+.nafe-admin__subteamTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+}
+.nafe-admin__subteamTag .dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+/* Responsive auth pill */
+@media (max-width: 720px) {
+  .nafe-userPill__meta { display: none; }
+  .nafe-auth { gap: 6px; }
+  .nafe-auth .nafe-btn { padding: 6px 10px; font-size: 11px; }
+}
