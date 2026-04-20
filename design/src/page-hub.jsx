@@ -63,11 +63,15 @@ function HubPage({ accent, cardVariant, onNav }) {
             <div className="nafe-hero__matchCard nafe-empty nafe-empty--card">
               <span className="nafe-mono" style={{ color: accent }}>AUCUN MATCH LIVE</span>
               <p className="nafe-empty__text">
-                Programme un match depuis l'espace admin pour qu'il apparaisse ici en temps réel.
+                {window.store.isAdmin()
+                  ? "Programme un match depuis l'espace admin pour qu'il apparaisse ici en temps réel."
+                  : "Aucun match en direct pour l'instant. Reviens plus tard !"}
               </p>
-              <button className="nafe-mono nafe-empty__cta" onClick={() => onNav("#/admin/matches")}>
-                → ADMIN MATCHS
-              </button>
+              {window.store.isAdmin() && (
+                <button className="nafe-mono nafe-empty__cta" onClick={() => onNav("#/admin/matches")}>
+                  → ADMIN MATCHS
+                </button>
+              )}
             </div>
           )}
         </div>
@@ -132,11 +136,15 @@ function HubPage({ accent, cardVariant, onNav }) {
           <div className="nafe-empty nafe-empty--panel">
             <span className="nafe-mono" style={{ color: accent }}>ROSTER VIDE</span>
             <p className="nafe-empty__text">
-              Aucun joueur enregistré pour Valorant. Ajoute des joueurs depuis l'espace admin.
+              {window.store.isAdmin()
+                ? "Aucun joueur enregistré pour Valorant. Ajoute des joueurs depuis l'espace admin."
+                : "Le roster officiel sera dévoilé prochainement."}
             </p>
-            <button className="nafe-btn nafe-btn--ghost" onClick={() => onNav("#/admin/players")}>
-              → Ajouter un joueur
-            </button>
+            {window.store.isAdmin() && (
+              <button className="nafe-btn nafe-btn--ghost" onClick={() => onNav("#/admin/players")}>
+                → Ajouter un joueur
+              </button>
+            )}
           </div>
         ) : (
           <div className={`nafe-roster nafe-roster--${cardVariant}`}>

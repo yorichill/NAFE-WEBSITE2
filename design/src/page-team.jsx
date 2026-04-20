@@ -123,10 +123,13 @@ function TeamPage({ accent, cardVariant, initialGame = "valorant" }) {
           <div className="nafe-empty nafe-empty--panel">
             <span className="nafe-mono" style={{ color: activeColor }}>AUCUN JOUEUR</span>
             <p className="nafe-empty__text">
-              Aucun joueur dans cette sélection. Ajoute un joueur (et rattache-le éventuellement
-              à une sous-équipe) depuis l'espace admin.
+              {window.store.isAdmin()
+                ? "Aucun joueur dans cette sélection. Ajoute un joueur (et rattache-le éventuellement à une sous-équipe) depuis l'espace admin."
+                : "Le roster sera bientôt dévoilé. Reviens vite !"}
             </p>
-            <a className="nafe-btn nafe-btn--ghost" href="#/admin/players">→ Admin joueurs</a>
+            {window.store.isAdmin() && (
+              <a className="nafe-btn nafe-btn--ghost" href="#/admin/players">→ Admin joueurs</a>
+            )}
           </div>
         ) : (
           <div className={`nafe-roster nafe-roster--${cardVariant}`}>
@@ -152,9 +155,13 @@ function TeamPage({ accent, cardVariant, initialGame = "valorant" }) {
           <div className="nafe-empty nafe-empty--panel">
             <span className="nafe-mono" style={{ color: activeColor }}>AUCUN TROPHÉE</span>
             <p className="nafe-empty__text">
-              Ajoute un résultat historique depuis l'espace admin.
+              {window.store.isAdmin()
+                ? "Ajoute un résultat historique depuis l'espace admin."
+                : "Le palmarès sera publié après les premières compétitions officielles."}
             </p>
-            <a className="nafe-btn nafe-btn--ghost" href="#/admin/trophies">→ Admin palmarès</a>
+            {window.store.isAdmin() && (
+              <a className="nafe-btn nafe-btn--ghost" href="#/admin/trophies">→ Admin palmarès</a>
+            )}
           </div>
         ) : (
           <div className="nafe-trophies">

@@ -27,12 +27,15 @@ function LivePage({ accent }) {
         <div className="nafe-empty nafe-empty--panel">
           <span className="nafe-mono" style={{ color: accent }}>AUCUN MATCH EN DIRECT</span>
           <p className="nafe-empty__text">
-            Pour faire apparaître un match ici, crée-le dans l'espace admin et passe
-            son statut à <strong>En direct</strong>.
+            {window.store.isAdmin()
+              ? <>Pour faire apparaître un match ici, crée-le dans l'espace admin et passe son statut à <strong>En direct</strong>.</>
+              : "Aucune diffusion live en ce moment. Abonne-toi pour être notifié du prochain stream."}
           </p>
-          <a className="nafe-btn nafe-btn--accent" style={{ background: accent }} href="#/admin/matches">
-            → Admin matchs
-          </a>
+          {window.store.isAdmin() && (
+            <a className="nafe-btn nafe-btn--accent" style={{ background: accent }} href="#/admin/matches">
+              → Admin matchs
+            </a>
+          )}
         </div>
         {upcoming.length > 0 && (
           <section className="nafe-section">

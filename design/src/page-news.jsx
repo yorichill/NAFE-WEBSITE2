@@ -31,11 +31,15 @@ function NewsPage({ accent }) {
         <div className="nafe-empty nafe-empty--panel">
           <span className="nafe-mono" style={{ color: accent }}>AUCUN ARTICLE</span>
           <p className="nafe-empty__text">
-            La rédaction n'a encore rien posté. Crée ta première dépêche depuis l'espace admin.
+            {window.store.isAdmin()
+              ? "La rédaction n'a encore rien posté. Crée ta première dépêche depuis l'espace admin."
+              : "Les premières dépêches arrivent très bientôt — reste connecté."}
           </p>
-          <a className="nafe-btn nafe-btn--accent" style={{ background: accent }} href="#/admin/news">
-            → Poster une actu
-          </a>
+          {window.store.isAdmin() && (
+            <a className="nafe-btn nafe-btn--accent" style={{ background: accent }} href="#/admin/news">
+              → Poster une actu
+            </a>
+          )}
         </div>
       ) : (
         <>

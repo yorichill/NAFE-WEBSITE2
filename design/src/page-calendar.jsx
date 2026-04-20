@@ -72,12 +72,15 @@ function CalendarPage({ accent }) {
         <div className="nafe-empty nafe-empty--panel">
           <span className="nafe-mono" style={{ color: accent }}>CALENDRIER VIDE</span>
           <p className="nafe-empty__text">
-            Aucun match ni événement programmé. Ajoute une entrée depuis l'espace admin
-            pour qu'elle apparaisse ici et dans le ticker.
+            {window.store.isAdmin()
+              ? "Aucun match ni événement programmé. Ajoute une entrée depuis l'espace admin pour qu'elle apparaisse ici et dans le ticker."
+              : "Le calendrier des prochains matchs sera publié sous peu."}
           </p>
-          <a className="nafe-btn nafe-btn--accent" style={{ background: accent }} href="#/admin/matches">
-            → Ajouter un match
-          </a>
+          {window.store.isAdmin() && (
+            <a className="nafe-btn nafe-btn--accent" style={{ background: accent }} href="#/admin/matches">
+              → Ajouter un match
+            </a>
+          )}
         </div>
       ) : (
         <>

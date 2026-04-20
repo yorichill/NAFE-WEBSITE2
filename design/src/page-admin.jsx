@@ -182,6 +182,13 @@ function FormShell({ title, children, onSubmit, onCancel, submitLabel = "Enregis
   );
 }
 
+function scrollToForm() {
+  const form = document.querySelector(".nafe-admin__form");
+  if (form) form.scrollIntoView({ behavior: "smooth", block: "start" });
+  const firstInput = form?.querySelector("input, select, textarea");
+  if (firstInput) setTimeout(() => firstInput.focus(), 350);
+}
+
 function DataTable({ columns, rows, onEdit, onDelete, empty, accent }) {
   if (!rows.length) {
     return (
@@ -207,7 +214,11 @@ function DataTable({ columns, rows, onEdit, onDelete, empty, accent }) {
             </span>
           ))}
           <div className="nafe-admin__tableActions" style={{ flex: 0, minWidth: 140 }}>
-            <button className="nafe-admin__iconBtn" onClick={() => onEdit(r)} title="Modifier">✎</button>
+            <button
+              className="nafe-admin__iconBtn"
+              onClick={() => { onEdit(r); scrollToForm(); }}
+              title="Modifier"
+            >✎</button>
             <button
               className="nafe-admin__iconBtn nafe-admin__iconBtn--danger"
               onClick={() => { if (confirm("Supprimer cette entrée ?")) onDelete(r.id); }}
