@@ -12,6 +12,8 @@
     subteams: "nafe:subteams",
     users:    "nafe:users",
     session:  "nafe:session",
+    posts:    "nafe:posts",
+    socials:  "nafe:socials",
   };
 
   const uid = (p) =>
@@ -66,6 +68,8 @@
   const trophies = crud(KEYS.trophies, "tr");
   const subteams = crud(KEYS.subteams, "st");
   const users    = crud(KEYS.users,    "us");
+  const posts    = crud(KEYS.posts,    "po");
+  const socials  = crud(KEYS.socials,  "sl");
 
   // --- Session (single object, not a list) ---
   const session = {
@@ -95,6 +99,8 @@
     trophies,
     subteams,
     users,
+    posts,
+    socials,
     session,
 
     // --- queries croisées utilisées par les pages publiques ---

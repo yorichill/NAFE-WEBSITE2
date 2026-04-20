@@ -123,8 +123,10 @@ function StickyHeader({ route, onNav, onLogin, onRegister, accent }) {
            className={route === "/calendar" ? "is-active" : ""}>Calendrier</a>
         <a href="#/news" onClick={(e) => { e.preventDefault(); onNav("#/news"); }}
            className={route === "/news" ? "is-active" : ""}>Actu</a>
-        <a href="#/club" onClick={(e) => { e.preventDefault(); onNav("#/club"); }}
-           className={route === "/club" ? "is-active" : ""}>Club</a>
+        <a href="#/community" onClick={(e) => { e.preventDefault(); onNav("#/community"); }}
+           className={route === "/community" ? "is-active" : ""}>Community</a>
+        <a href="#/contact" onClick={(e) => { e.preventDefault(); onNav("#/contact"); }}
+           className={route === "/contact" ? "is-active" : ""}>Contact</a>
         <UserPill onLogin={onLogin} onRegister={onRegister} onNav={onNav} accent={accent} />
       </nav>
     </header>
@@ -146,16 +148,23 @@ function Sidebar({ route, onNav }) {
     ],
     live: [{ label: "Match en cours", href: "#/live" }],
     calendar: [{ label: "Mois & liste", href: "#/calendar" }],
-    news: [{ label: "Dernières dépêches", href: "#/news" }],
-    club: [{ label: "Dashboard", href: "#/club" }],
+    news:      [{ label: "Dernières dépêches", href: "#/news" }],
+    community: [{ label: "Posts & discussions", href: "#/community" }],
+    contact:   [
+      { label: "Discord",   href: "#/contact" },
+      { label: "Twitch",    href: "#/contact" },
+      { label: "YouTube",   href: "#/contact" },
+      { label: "Twitter/X", href: "#/contact" },
+    ],
     admin: [
-      { label: "Joueurs", href: "#/admin/players" },
-      { label: "Sous-équipes", href: "#/admin/subteams" },
-      { label: "Matchs & calendrier", href: "#/admin/matches" },
-      { label: "Actualités", href: "#/admin/news" },
-      { label: "Ticker scores", href: "#/admin/scores" },
-      { label: "Palmarès", href: "#/admin/trophies" },
-      { label: "Utilisateurs", href: "#/admin/users" },
+      { label: "Joueurs",            href: "#/admin/players" },
+      { label: "Sous-équipes",       href: "#/admin/subteams" },
+      { label: "Matchs & calendrier",href: "#/admin/matches" },
+      { label: "Actualités",         href: "#/admin/news" },
+      { label: "Ticker scores",      href: "#/admin/scores" },
+      { label: "Palmarès",           href: "#/admin/trophies" },
+      { label: "Réseaux sociaux",    href: "#/admin/socials" },
+      { label: "Utilisateurs",       href: "#/admin/users" },
     ],
     shop: [{ label: "Bientôt", href: "#/shop" }],
   };
@@ -168,10 +177,12 @@ function Sidebar({ route, onNav }) {
       <div className="nafe-sidebar__mark">N</div>
       {items.map((item) => {
         const active =
-          (item.key === "teams" && route.startsWith("/teams")) ||
-          (item.key === "admin" && route.startsWith("/admin")) ||
-          (item.key === "home" && route === "/") ||
-          (item.key === item.key && route === `/${item.key}`);
+          (item.key === "teams"     && route.startsWith("/teams")) ||
+          (item.key === "admin"     && route.startsWith("/admin")) ||
+          (item.key === "home"      && route === "/") ||
+          (item.key === "community" && route === "/community") ||
+          (item.key === "contact"   && route === "/contact") ||
+          (item.key !== "teams" && item.key !== "admin" && item.key !== "home" && route === `/${item.key}`);
         return (
           <div
             key={item.key}

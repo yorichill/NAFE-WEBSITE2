@@ -2303,3 +2303,238 @@ a { color: inherit; text-decoration: none; }
   .nafe-auth { gap: 6px; }
   .nafe-auth .nafe-btn { padding: 6px 10px; font-size: 11px; }
 }
+
+/* ================================================================
+   COMMUNITY — posts / discussions
+   ================================================================ */
+
+/* Formulaire de création de post */
+.nafe-post-form {
+  padding: 28px 28px 24px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.nafe-post-form__title {
+  font-size: 28px;
+  line-height: 1;
+  margin: 0 0 4px;
+}
+.nafe-post-form .nafe-field { display: flex; flex-direction: column; gap: 6px; }
+.nafe-post-form input,
+.nafe-post-form textarea {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-size: 14px;
+  font-family: inherit;
+  padding: 11px 14px;
+  resize: vertical;
+  transition: border-color 0.15s;
+}
+.nafe-post-form input:focus,
+.nafe-post-form textarea:focus {
+  outline: none;
+  border-color: rgba(255, 255, 255, 0.3);
+}
+.nafe-post-form__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 4px;
+}
+
+/* Feed de posts */
+.nafe-posts {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.nafe-post {
+  padding: 22px 24px 18px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  transition: border-color 0.2s;
+}
+.nafe-post:hover { border-color: rgba(255, 255, 255, 0.14); }
+.nafe-post__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.nafe-post__meta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.nafe-post__author {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  font-weight: 700;
+}
+.nafe-post__date {
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.4);
+}
+.nafe-post__title {
+  font-size: 22px;
+  line-height: 1.1;
+  margin: 0 0 10px;
+}
+.nafe-post__content {
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 14px;
+  line-height: 1.65;
+  margin: 0 0 14px;
+  white-space: pre-wrap;
+}
+.nafe-post__foot {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.nafe-post__like {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 5px 12px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  transition: background 0.15s, border-color 0.15s;
+}
+.nafe-post__like:hover { background: rgba(255, 255, 255, 0.05); }
+.nafe-post__del {
+  background: transparent;
+  border: 1px solid rgba(229, 62, 62, 0.3);
+  color: #ff7a85;
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+.nafe-post__del:hover { background: rgba(229, 62, 62, 0.1); }
+
+/* ================================================================
+   CONTACT — réseaux sociaux
+   ================================================================ */
+
+/* Carte hero Discord */
+.nafe-social-hero {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  padding: 32px 36px;
+  border: 1px solid rgba(255,255,255,0.08);
+  flex-wrap: wrap;
+}
+.nafe-social-hero__icon {
+  width: 72px;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.nafe-social-hero__body {
+  flex: 1;
+  min-width: 180px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.nafe-social-hero__platform {
+  font-size: 10px;
+  letter-spacing: 0.18em;
+}
+.nafe-social-hero__handle {
+  font-size: 32px;
+  line-height: 1;
+  margin: 0;
+}
+.nafe-social-hero__desc {
+  color: rgba(255,255,255,0.6);
+  font-size: 14px;
+  margin: 0;
+  line-height: 1.5;
+}
+.nafe-social-hero__cta {
+  flex-shrink: 0;
+  padding: 14px 24px;
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Grille des autres réseaux */
+.nafe-socials-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 14px;
+}
+.nafe-social-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 22px 20px 18px;
+  border: 1px solid rgba(255,255,255,0.07);
+  background: rgba(255,255,255,0.02);
+  text-decoration: none;
+  color: #fff;
+  transition: transform 0.2s, border-color 0.2s, background 0.2s;
+}
+.nafe-social-card:hover {
+  transform: translateY(-3px);
+  background: rgba(255,255,255,0.04);
+}
+.nafe-social-card__icon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.nafe-social-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+.nafe-social-card__platform {
+  font-size: 9px;
+  letter-spacing: 0.16em;
+}
+.nafe-social-card__handle {
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.1;
+}
+.nafe-social-card__desc {
+  font-size: 12px;
+  color: rgba(255,255,255,0.55);
+  line-height: 1.4;
+  margin-top: 2px;
+}
+.nafe-social-card__cta {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  margin-top: auto;
+}
+
+@media (max-width: 720px) {
+  .nafe-social-hero { flex-direction: column; align-items: flex-start; }
+  .nafe-socials-grid { grid-template-columns: 1fr; }
+}

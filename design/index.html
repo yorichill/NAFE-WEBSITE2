@@ -25,6 +25,8 @@
   <script type="text/babel" src="src/page-live.jsx"></script>
   <script type="text/babel" src="src/page-news.jsx"></script>
   <script type="text/babel" src="src/page-calendar.jsx"></script>
+  <script type="text/babel" src="src/page-community.jsx"></script>
+  <script type="text/babel" src="src/page-contact.jsx"></script>
   <script type="text/babel" src="src/page-admin.jsx"></script>
   <script type="text/babel" src="src/auth-modal.jsx"></script>
 
@@ -97,7 +99,8 @@
         const g = route.split("/")[2];
         Page = <window.TeamPage accent={accent} cardVariant={cardVariant} initialGame={g} key={g} />;
       }
-      else if (route === "/club") Page = <window.ClubPage accent={accent} />;
+      else if (route === "/community") Page = <window.CommunityPage accent={accent} />;
+      else if (route === "/contact")   Page = <window.ContactPage   accent={accent} />;
       else if (route === "/live") Page = <window.LivePage accent={accent} />;
       else if (route === "/news") Page = <window.NewsPage accent={accent} />;
       else if (route === "/calendar") Page = <window.CalendarPage accent={accent} />;

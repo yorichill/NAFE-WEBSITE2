@@ -4,13 +4,15 @@
 const { useState: useAdminState, useEffect: useAdminEffect } = React;
 
 const ADMIN_TABS = [
-  { k: "players",  label: "Joueurs",             icon: "👤" },
-  { k: "subteams", label: "Sous-équipes",        icon: "◈" },
-  { k: "matches",  label: "Matchs & calendrier", icon: "📅" },
-  { k: "news",     label: "Actualités",          icon: "📰" },
-  { k: "scores",   label: "Ticker scores",       icon: "📊" },
-  { k: "trophies", label: "Palmarès",            icon: "🏆" },
-  { k: "users",    label: "Utilisateurs",        icon: "👥" },
+  { k: "players",   label: "Joueurs",             icon: "👤" },
+  { k: "subteams",  label: "Sous-équipes",        icon: "◈" },
+  { k: "matches",   label: "Matchs & calendrier", icon: "📅" },
+  { k: "news",      label: "Actualités",          icon: "📰" },
+  { k: "scores",    label: "Ticker scores",       icon: "📊" },
+  { k: "trophies",  label: "Palmarès",            icon: "🏆" },
+  { k: "socials",   label: "Réseaux sociaux",     icon: "🔗" },
+  { k: "community", label: "Communauté",          icon: "💬" },
+  { k: "users",     label: "Utilisateurs",        icon: "👥" },
 ];
 
 // Route helper : renvoie la sous-page courante depuis le hash
@@ -69,13 +71,15 @@ function AdminPage({ accent }) {
   }
 
   const counts = {
-    players:  window.store.players.list().length,
-    subteams: window.store.subteams.list().length,
-    matches:  window.store.matches.list().length,
-    news:     window.store.news.list().length,
-    scores:   window.store.scores.list().length,
-    trophies: window.store.trophies.list().length,
-    users:    window.store.users.list().length,
+    players:   window.store.players.list().length,
+    subteams:  window.store.subteams.list().length,
+    matches:   window.store.matches.list().length,
+    news:      window.store.news.list().length,
+    scores:    window.store.scores.list().length,
+    trophies:  window.store.trophies.list().length,
+    socials:   window.store.socials.list().length,
+    community: window.store.posts.list().length,
+    users:     window.store.users.list().length,
   };
 
   return (
@@ -136,13 +140,15 @@ function AdminPage({ accent }) {
       </section>
 
       <section className="nafe-admin__panel">
-        {tab === "players"  && <PlayersAdmin  accent={accent} />}
-        {tab === "subteams" && <SubteamsAdmin accent={accent} />}
-        {tab === "matches"  && <MatchesAdmin  accent={accent} />}
-        {tab === "news"     && <NewsAdmin     accent={accent} />}
-        {tab === "scores"   && <ScoresAdmin   accent={accent} />}
-        {tab === "trophies" && <TrophiesAdmin accent={accent} />}
-        {tab === "users"    && <UsersAdmin    accent={accent} currentUser={user} />}
+        {tab === "players"   && <PlayersAdmin   accent={accent} />}
+        {tab === "subteams"  && <SubteamsAdmin  accent={accent} />}
+        {tab === "matches"   && <MatchesAdmin   accent={accent} />}
+        {tab === "news"      && <NewsAdmin      accent={accent} />}
+        {tab === "scores"    && <ScoresAdmin    accent={accent} />}
+        {tab === "trophies"  && <TrophiesAdmin  accent={accent} />}
+        {tab === "socials"   && <SocialsAdmin   accent={accent} />}
+        {tab === "community" && <CommunityAdmin accent={accent} />}
+        {tab === "users"     && <UsersAdmin     accent={accent} currentUser={user} />}
       </section>
     </div>
   );
@@ -881,6 +887,135 @@ function UsersAdmin({ accent, currentUser }) {
           if (id === currentUser.id) return alert("Tu ne peux pas supprimer ton propre compte.");
           window.store.users.remove(id);
         }}
+      />
+    </div>
+  );
+}
+
+// ============================================================
+//  Socials (réseaux sociaux)
+// ============================================================
+const PLATFORM_OPTIONS = ["discord","twitch","youtube","twitter","instagram","tiktok","kick","snapchat"];
+
+function SocialsAdmin({ accent }) {
+  const list = window.store.socials.list();
+  const [editing, setEditing] = useAdminState(null);
+  const [draft, setDraft] = useAdminState(emptySocial());
+
+  function emptySocial() {
+    return { platform: "discord", handle: "", url: "", description: "" };
+  }
+  function startEdit(s) { setEditing(s.id); setDraft({ ...emptySocial(), ...s }); }
+  function submit() {
+    if (!draft.handle.trim()) return alert("Le handle / nom est requis");
+    if (!draft.url.trim()) return alert("L'URL est requise");
+    if (editing) window.store.socials.update(editing, draft);
+    else window.store.socials.add(draft);
+    setEditing(null);
+    setDraft(emptySocial());
+  }
+
+  const meta = window.PLATFORM_META?.[draft.platform];
+  const previewColor = meta?.bg || meta?.color || accent;
+
+  return (
+    <div className="nafe-admin__section">
+      <div className="nafe-admin__note">
+        <span className="nafe-mono" style={{ color: accent }}>ⓘ RÉSEAUX</span>
+        <p>Ajoute ici les liens vers vos réseaux sociaux. Ils s'affichent sur la page <strong>Contact</strong>.
+        Discord bénéficie d'une carte héro mise en avant.</p>
+      </div>
+      <FormShell
+        title={editing ? "Modifier le réseau" : "Ajouter un réseau social"}
+        onSubmit={submit}
+        onCancel={editing ? () => { setEditing(null); setDraft(emptySocial()); } : null}
+        submitLabel={editing ? "Mettre à jour" : "Ajouter"}
+        accent={accent}
+      >
+        <Field label="Plateforme">
+          <select value={draft.platform} onChange={(e) => setDraft({ ...draft, platform: e.target.value })}>
+            {PLATFORM_OPTIONS.map((p) => (
+              <option key={p} value={p}>{p.charAt(0).toUpperCase() + p.slice(1)}</option>
+            ))}
+          </select>
+        </Field>
+        <Field label="Aperçu logo">
+          <div style={{ display:"flex", alignItems:"center", gap:12, padding:"8px 0" }}>
+            <div style={{ width:40, height:40, background: previewColor, display:"flex", alignItems:"center", justifyContent:"center" }}>
+              {window.PlatformIcon && <window.PlatformIcon platform={draft.platform} size={24} />}
+            </div>
+            <span className="nafe-mono" style={{ color: previewColor, fontSize:11 }}>{draft.platform.toUpperCase()}</span>
+          </div>
+        </Field>
+        <Field label="Handle / Nom affiché" span={2}>
+          <input value={draft.handle} onChange={(e) => setDraft({ ...draft, handle: e.target.value })}
+                 placeholder="Ex: NAFE Officiel, @NafeOfficiel" />
+        </Field>
+        <Field label="URL du lien" span={2}>
+          <input type="url" value={draft.url} onChange={(e) => setDraft({ ...draft, url: e.target.value })}
+                 placeholder="https://discord.gg/xxx" />
+        </Field>
+        <Field label="Description (optionnel)" span={4}>
+          <input value={draft.description} onChange={(e) => setDraft({ ...draft, description: e.target.value })}
+                 placeholder="Ex: Le serveur Discord officiel — merch drops, Q&A, events" />
+        </Field>
+      </FormShell>
+      <DataTable
+        accent={accent}
+        empty="Aucun réseau configuré. Ajoute le premier ci-dessus."
+        columns={[
+          { key: "platform", label: "PLATEFORME", flex: 0.7, render: (r) => {
+            const m = window.PLATFORM_META?.[r.platform];
+            const c = m?.bg || m?.color || accent;
+            return (
+              <span style={{ display:"flex", alignItems:"center", gap:8 }}>
+                <span style={{ width:20, height:20, background:c, display:"inline-flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+                  {window.PlatformIcon && <window.PlatformIcon platform={r.platform} size={12} />}
+                </span>
+                <span className="nafe-mono" style={{ color:c, fontSize:11 }}>{r.platform.toUpperCase()}</span>
+              </span>
+            );
+          }},
+          { key: "handle",      label: "HANDLE",      flex: 1 },
+          { key: "url",         label: "URL",         flex: 1.4, render: (r) => <a href={r.url} target="_blank" rel="noopener noreferrer" style={{ color: accent, wordBreak:"break-all", fontSize:11 }}>{r.url}</a> },
+          { key: "description", label: "DESCRIPTION", flex: 1.5 },
+        ]}
+        rows={list}
+        onEdit={startEdit}
+        onDelete={(id) => window.store.socials.remove(id)}
+      />
+    </div>
+  );
+}
+
+// ============================================================
+//  Community (modération des posts)
+// ============================================================
+function CommunityAdmin({ accent }) {
+  const list = window.store.posts.list()
+    .slice()
+    .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+
+  return (
+    <div className="nafe-admin__section">
+      <div className="nafe-admin__note">
+        <span className="nafe-mono" style={{ color: accent }}>ⓘ MODÉRATION</span>
+        <p>Voici tous les posts publiés par les fans. Tu peux supprimer un post inapproprié
+        via le bouton ✕. Les fans gèrent eux-mêmes la création depuis la page Community.</p>
+      </div>
+      <DataTable
+        accent={accent}
+        empty="Aucun post publié pour l'instant."
+        columns={[
+          { key: "authorName", label: "AUTEUR",  flex: 0.7 },
+          { key: "title",      label: "TITRE",   flex: 1.4 },
+          { key: "content",    label: "CONTENU", flex: 2,   render: (r) => r.content?.slice(0, 80) + (r.content?.length > 80 ? "…" : "") },
+          { key: "likes",      label: "♥",       flex: 0.3, render: (r) => r.likes || 0 },
+          { key: "createdAt",  label: "DATE",    flex: 0.7, render: (r) => r.createdAt ? new Date(r.createdAt).toLocaleDateString("fr-FR") : "—" },
+        ]}
+        rows={list}
+        onEdit={() => {}}
+        onDelete={(id) => { if (confirm("Supprimer ce post ?")) window.store.posts.remove(id); }}
       />
     </div>
   );

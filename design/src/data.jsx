@@ -90,13 +90,14 @@ const REWARDS = [
 ];
 
 const NAV = [
-  { key: "home",     label: "Hub",        icon: "◉", href: "#/" },
-  { key: "teams",    label: "Teams",      icon: "▣", href: "#/teams/valorant" },
-  { key: "live",     label: "Live",       icon: "▶", href: "#/live" },
-  { key: "calendar", label: "Calendrier", icon: "▤", href: "#/calendar" },
-  { key: "news",     label: "Actu",       icon: "✎", href: "#/news" },
-  { key: "club",     label: "Club",       icon: "✦", href: "#/club" },
-  { key: "admin",    label: "Admin",      icon: "⚙", href: "#/admin" },
+  { key: "home",      label: "Hub",        icon: "◉", href: "#/" },
+  { key: "teams",     label: "Teams",      icon: "▣", href: "#/teams/valorant" },
+  { key: "live",      label: "Live",       icon: "▶", href: "#/live" },
+  { key: "calendar",  label: "Calendrier", icon: "▤", href: "#/calendar" },
+  { key: "news",      label: "Actu",       icon: "✎", href: "#/news" },
+  { key: "community", label: "Community",  icon: "✦", href: "#/community" },
+  { key: "contact",   label: "Contact",    icon: "⊙", href: "#/contact" },
+  { key: "admin",     label: "Admin",      icon: "⚙", href: "#/admin" },
 ];
 
 Object.assign(window, { TEAMS_META, getTeam, MISSIONS, REWARDS, NAV, tintPalette, hexToHsl, hslToHex });
