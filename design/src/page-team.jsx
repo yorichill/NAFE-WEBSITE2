@@ -21,9 +21,11 @@ function TeamPage({ accent, cardVariant, initialGame = "valorant" }) {
       ? gameColor
       : subteams.find((s) => s.id === subteam)?.color || gameColor;
 
+  // "all" = roster principal (joueurs sans sous-équipe)
+  // st.id = uniquement les joueurs de cette sous-équipe
   const roster =
     subteam === "all"
-      ? window.store.getPlayersByTeam(game)
+      ? window.store.getPlayersByTeam(game, "")
       : window.store.getPlayersByTeam(game, subteam);
 
   const trophies = window.store.getTrophiesByTeam(game);
@@ -75,9 +77,9 @@ function TeamPage({ accent, cardVariant, initialGame = "valorant" }) {
                 onClick={() => setSubteam("all")}
               >
                 <span className="nafe-subteam__dot" style={{ background: gameColor }} />
-                <span className="nafe-mono">TOUTES</span>
+                <span className="nafe-mono">PRINCIPALE</span>
                 <span className="nafe-subteam__count nafe-mono">
-                  {window.store.getPlayersByTeam(game).length}
+                  {window.store.getPlayersByTeam(game, "").length}
                 </span>
               </button>
               {subteams.map((st) => {
