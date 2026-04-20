@@ -4,7 +4,7 @@
 
 const TEAMS_META = {
   valorant: { slug: "valorant", game: "VALORANT",          title: "NAFE Valorant", region: "EMEA", color: "#FF4655" },
-  lol:      { slug: "lol",      game: "LEAGUE OF LEGENDS", title: "NAFE LoL",      region: "LEC",  color: "#C89B3C" },
+  rl:       { slug: "rl",       game: "ROCKET LEAGUE",      title: "NAFE Rocket League", region: "RLCS", color: "#1B9EF0" },
   cs2:      { slug: "cs2",      game: "COUNTER-STRIKE 2",  title: "NAFE CS2",      region: "EU",   color: "#F5A623" },
 };
 

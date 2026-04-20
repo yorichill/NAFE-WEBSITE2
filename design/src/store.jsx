@@ -185,6 +185,40 @@
       news.add({ date: new Date().toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" }).toUpperCase(), cat: "Annonce", game: "CLUB", title: "Premier post de test", lede: "Crée, modifie ou supprime cette actu depuis l'espace Admin.", author: "Staff", readTime: "1 min", featured: true });
     },
 
+    // Migration : renomme les clés de jeu obsolètes dans les collections existantes
+    migrate: () => {
+      const RENAMES = { lol: "rl" }; // ancien slug → nouveau slug
+      let dirty = false;
+      [players, matches, trophies, subteams].forEach((col) => {
+        const all = col.list();
+        const patched = all.map((x) => {
+          const next = RENAMES[x.team];
+          if (next) { dirty = true; return { ...x, team: next }; }
+          const nextParent = RENAMES[x.parent];
+          if (nextParent) { dirty = true; return { ...x, parent: nextParent }; }
+          const nextGame = RENAMES[x.game?.toLowerCase()];
+          if (nextGame) { dirty = true; return { ...x, game: x.game?.toUpperCase?.() === "LOL" ? "RL" : x.game }; }
+          return x;
+        });
+        if (dirty) col.clear && patched.forEach((r) => { /* handled below */ });
+      });
+      // Écriture directe pour éviter d'émettre des events inutiles
+      [
+        [KEYS.players,  players.list()],
+        [KEYS.matches,  matches.list()],
+        [KEYS.trophies, trophies.list()],
+        [KEYS.subteams, subteams.list()],
+      ].forEach(([key, all]) => {
+        const patched = all.map((x) => {
+          if (RENAMES[x.team])   return { ...x, team:   RENAMES[x.team] };
+          if (RENAMES[x.parent]) return { ...x, parent: RENAMES[x.parent] };
+          return x;
+        });
+        const changed = patched.some((p, i) => p !== all[i]);
+        if (changed) localStorage.setItem(key, JSON.stringify(patched));
+      });
+    },
+
     wipeAll: () => {
       Object.values(KEYS).forEach((k) => localStorage.removeItem(k));
       window.dispatchEvent(new CustomEvent("store:update", { detail: { key: "*" } }));

@@ -5,7 +5,7 @@ const { useState: useCalState, useMemo } = React;
 const GAME_FILTERS = [
   { k: "ALL",  label: "Tout" },
   { k: "VAL",  label: "Valorant" },
-  { k: "LOL",  label: "League" },
+  { k: "RL",   label: "Rocket League" },
   { k: "CS2",  label: "CS2" },
   { k: "DROP", label: "Drops & Events" },
 ];

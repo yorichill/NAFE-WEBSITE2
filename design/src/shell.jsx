@@ -141,7 +141,7 @@ function Sidebar({ route, onNav }) {
     home: [{ label: "Accueil", href: "#/" }],
     teams: [
       { label: "Valorant", href: "#/teams/valorant" },
-      { label: "League of Legends", href: "#/teams/lol" },
+      { label: "Rocket League", href: "#/teams/rl" },
       { label: "CS2", href: "#/teams/cs2" },
     ],
     live: [{ label: "Match en cours", href: "#/live" }],

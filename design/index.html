@@ -45,6 +45,9 @@
       { name: "Ice",      value: "#9AB7FF", rgb: "154, 183, 255" },
     ];
 
+    // Migration données : renomme les anciens slugs (lol→rl) dans le localStorage
+    window.store.migrate();
+
     function parseRoute() {
       const h = location.hash.replace(/^#/, "") || "/";
       return h;
