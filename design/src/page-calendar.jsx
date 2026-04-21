@@ -68,22 +68,7 @@ function CalendarPage({ accent }) {
         </p>
       </section>
 
-      {FIXTURES.length === 0 ? (
-        <div className="nafe-empty nafe-empty--panel">
-          <span className="nafe-mono" style={{ color: accent }}>CALENDRIER VIDE</span>
-          <p className="nafe-empty__text">
-            {window.store.isAdmin()
-              ? "Aucun match ni événement programmé. Ajoute une entrée depuis l'espace admin pour qu'elle apparaisse ici et dans le ticker."
-              : "Le calendrier des prochains matchs sera publié sous peu."}
-          </p>
-          {window.store.isAdmin() && (
-            <a className="nafe-btn nafe-btn--accent" style={{ background: accent }} href="#/admin/matches">
-              → Ajouter un match
-            </a>
-          )}
-        </div>
-      ) : (
-        <>
+      <>
           <section className="nafe-cal__stats">
             <div className="nafe-cal__stat">
               <span className="nafe-mono nafe-cal__statL">MATCHS AFFICHÉS</span>
@@ -178,6 +163,21 @@ function CalendarPage({ accent }) {
             </section>
           ) : (
             <section className="nafe-cal__list">
+              {filtered.length === 0 && (
+                <div className="nafe-empty">
+                  <span className="nafe-mono" style={{ color: accent }}>AUCUN MATCH</span>
+                  <p className="nafe-empty__text">
+                    {window.store.isAdmin()
+                      ? "Aucun match programmé pour cette période."
+                      : "Le calendrier des prochains matchs sera publié sous peu."}
+                  </p>
+                  {window.store.isAdmin() && (
+                    <a className="nafe-btn nafe-btn--accent" style={{ background: accent }} href="#/admin/matches">
+                      → Ajouter un match
+                    </a>
+                  )}
+                </div>
+              )}
               {filtered.map((e) => {
                 const dObj = new Date(e.date);
                 const day = dObj.getDate();
@@ -216,8 +216,7 @@ function CalendarPage({ accent }) {
               })}
             </section>
           )}
-        </>
-      )}
+      </>
     </div>
   );
 }

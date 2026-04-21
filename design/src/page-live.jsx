@@ -2,6 +2,23 @@
 
 const { useState: useLiveState, useEffect: useLiveEffect } = React;
 
+const TWITCH_CHANNEL = "nafe_officiel";
+
+function TwitchPlayer({ autoplay = false }) {
+  const parent = window.location.hostname || "localhost";
+  const src = `https://player.twitch.tv/?channel=${TWITCH_CHANNEL}&parent=${parent}&autoplay=${autoplay}`;
+  return (
+    <div style={{ position: "relative", width: "100%", paddingTop: "56.25%", background: "#0e0e10" }}>
+      <iframe
+        src={src}
+        allowFullScreen
+        style={{ position: "absolute", inset: 0, width: "100%", height: "100%", border: "none", display: "block" }}
+        title="NAFE Twitch"
+      />
+    </div>
+  );
+}
+
 function LivePage({ accent }) {
   window.store.useVersion();
   const live = window.store.getLiveMatch();
@@ -21,22 +38,43 @@ function LivePage({ accent }) {
           <span className="nafe-eyebrow" style={{ color: accent }}>Live · NAFE TEAM</span>
           <h1 className="nafe-display nafe-team__title">LIVE<span style={{ color: accent }}>.</span></h1>
           <p className="nafe-team__lede">
-            Ici s'affichent le match en cours, le scoreboard et le chat du club.
+            Ici s'affichent le match en cours, le scoreboard et le stream du club.
           </p>
         </section>
-        <div className="nafe-empty nafe-empty--panel">
-          <span className="nafe-mono" style={{ color: accent }}>AUCUN MATCH EN DIRECT</span>
-          <p className="nafe-empty__text">
-            {window.store.isAdmin()
-              ? <>Pour faire apparaître un match ici, crée-le dans l'espace admin et passe son statut à <strong>En direct</strong>.</>
-              : "Aucune diffusion live en ce moment. Abonne-toi pour être notifié du prochain stream."}
-          </p>
-          {window.store.isAdmin() && (
-            <a className="nafe-btn nafe-btn--accent" style={{ background: accent }} href="#/admin/matches">
-              → Admin matchs
+
+        {/* Twitch player — toujours visible */}
+        <section className="nafe-section" style={{ marginTop: 0 }}>
+          <header className="nafe-section__head" style={{ marginBottom: 16 }}>
+            <div>
+              <span className="nafe-eyebrow" style={{ color: "#9147ff" }}>Twitch · {TWITCH_CHANNEL}</span>
+              <h2 className="nafe-display nafe-section__title">Canal officiel</h2>
+            </div>
+            <a
+              className="nafe-mono"
+              href={`https://www.twitch.tv/${TWITCH_CHANNEL}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: "#9147ff", opacity: 0.85, fontSize: 12 }}
+            >
+              OUVRIR SUR TWITCH →
             </a>
-          )}
-        </div>
+          </header>
+          <TwitchPlayer autoplay={false} />
+          <div className="nafe-empty" style={{ marginTop: 16, padding: "16px 0" }}>
+            <span className="nafe-mono" style={{ color: accent }}>AUCUN MATCH EN DIRECT</span>
+            <p className="nafe-empty__text" style={{ marginTop: 8 }}>
+              {window.store.isAdmin()
+                ? <>Passe un match en statut <strong>En direct</strong> depuis l'admin pour afficher le scoreboard ici.</>
+                : "Aucune diffusion live en ce moment. Abonne-toi pour être notifié du prochain stream."}
+            </p>
+            {window.store.isAdmin() && (
+              <a className="nafe-btn nafe-btn--accent" style={{ background: accent, marginTop: 12 }} href="#/admin/matches">
+                → Admin matchs
+              </a>
+            )}
+          </div>
+        </section>
+
         {upcoming.length > 0 && (
           <section className="nafe-section">
             <header className="nafe-section__head">
@@ -114,14 +152,21 @@ function LivePage({ accent }) {
         </div>
 
         <div className="nafe-live__cta">
-          <button className="nafe-btn nafe-btn--accent nafe-clip-card" style={{ background: accent }}>
-            ▶  Regarder le stream
-          </button>
-          <button className="nafe-btn nafe-btn--ghost nafe-clip-card">
-            Stats en direct
-          </button>
+          <a
+            className="nafe-btn nafe-btn--ghost nafe-clip-card"
+            href={`https://www.twitch.tv/${TWITCH_CHANNEL}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            ↗ Ouvrir sur Twitch
+          </a>
           <span className="nafe-mono nafe-live__platforms">TWITCH · YT · KICK</span>
         </div>
+      </section>
+
+      {/* Stream embed */}
+      <section className="nafe-section" style={{ marginTop: 0 }}>
+        <TwitchPlayer autoplay={false} />
       </section>
 
       {/* Upcoming */}

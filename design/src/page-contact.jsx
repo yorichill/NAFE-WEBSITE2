@@ -98,34 +98,6 @@ function ContactPage({ accent }) {
         </p>
       </section>
 
-      {/* Carte Discord hero si configurée */}
-      {discordLink && (
-        <section className="nafe-section">
-          <div
-            className="nafe-social-hero nafe-clip-card"
-            style={{ borderColor: PLATFORM_META.discord.color + "44", background: PLATFORM_META.discord.color + "12" }}
-          >
-            <div className="nafe-social-hero__icon" style={{ background: PLATFORM_META.discord.color }}>
-              <PlatformIcon platform="discord" size={40} />
-            </div>
-            <div className="nafe-social-hero__body">
-              <span className="nafe-mono nafe-social-hero__platform" style={{ color: PLATFORM_META.discord.color }}>DISCORD</span>
-              <h2 className="nafe-display nafe-social-hero__handle">{discordLink.handle}</h2>
-              {discordLink.description && <p className="nafe-social-hero__desc">{discordLink.description}</p>}
-            </div>
-            <a
-              className="nafe-btn nafe-btn--accent nafe-social-hero__cta"
-              style={{ background: PLATFORM_META.discord.color }}
-              href={discordLink.url}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {PLATFORM_META.discord.cta} →
-            </a>
-          </div>
-        </section>
-      )}
-
       {/* Grille complète — tous les réseaux, actifs ou à venir */}
       <section className="nafe-section">
         <header className="nafe-section__head">

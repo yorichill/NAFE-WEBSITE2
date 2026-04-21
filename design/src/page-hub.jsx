@@ -114,47 +114,6 @@ function HubPage({ accent, cardVariant, onNav }) {
         </div>
       </section>
 
-      {/* ROSTER preview */}
-      <section className="nafe-section">
-        <header className="nafe-section__head">
-          <div>
-            <span className="nafe-eyebrow">Roster · Valorant</span>
-            <h2 className="nafe-display nafe-section__title">
-              Le Cinq de Départ
-            </h2>
-          </div>
-          <a
-            href="#/teams/valorant"
-            className="nafe-section__link"
-            onClick={(e) => { e.preventDefault(); onNav("#/teams/valorant"); }}
-          >
-            Voir l'effectif complet →
-          </a>
-        </header>
-
-        {roster.length === 0 ? (
-          <div className="nafe-empty nafe-empty--panel">
-            <span className="nafe-mono" style={{ color: accent }}>ROSTER VIDE</span>
-            <p className="nafe-empty__text">
-              {window.store.isAdmin()
-                ? "Aucun joueur enregistré pour Valorant. Ajoute des joueurs depuis l'espace admin."
-                : "Le roster officiel sera dévoilé prochainement."}
-            </p>
-            {window.store.isAdmin() && (
-              <button className="nafe-btn nafe-btn--ghost" onClick={() => onNav("#/admin/players")}>
-                → Ajouter un joueur
-              </button>
-            )}
-          </div>
-        ) : (
-          <div className={`nafe-roster nafe-roster--${cardVariant}`}>
-            {roster.map((p) => (
-              <window.PlayerCard key={p.id || p.tag} p={p} accent={accent} variant={cardVariant} />
-            ))}
-          </div>
-        )}
-      </section>
-
       {/* Manifesto strip */}
       <section className="nafe-manifesto">
         <div className="nafe-manifesto__inner">

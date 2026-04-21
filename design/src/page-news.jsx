@@ -1,18 +1,65 @@
 // NAFE — News / Actualités page
 
-const { useState: useNewsState } = React;
+const { useState: useNewsState, useEffect: useNewsEffect } = React;
 
-const CATS = ["Tout", "Compétition", "Annonce", "Transfert", "Analyse", "Structure", "Partenariat", "Académie"];
+const TWEETS_API = "http://localhost:3000/api/tweets";
+const CATS = ["Tout", "Twitter", "Compétition", "Annonce", "Transfert", "Analyse", "Structure", "Partenariat", "Académie"];
+
+function TweetCard({ tweet }) {
+  const date = new Date(tweet.created_at).toLocaleDateString("fr-FR", { day: "numeric", month: "short" }).toUpperCase();
+  const likes = tweet.public_metrics?.like_count ?? 0;
+  const rts   = tweet.public_metrics?.retweet_count ?? 0;
+  return (
+    <a
+      href={`https://x.com/NafeOfficiel/status/${tweet.id}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="nafe-news__card"
+      style={{ textDecoration: "none", display: "flex", flexDirection: "column", cursor: "pointer" }}
+    >
+      <div style={{ padding: "14px 18px 6px", borderBottom: "1px solid rgba(29,155,240,0.15)", display: "flex", alignItems: "center", gap: 8 }}>
+        <span style={{ color: "#1d9bf0", fontWeight: 700, fontSize: 14, fontFamily: "JetBrains Mono, monospace", letterSpacing: 1 }}>𝕏</span>
+        <span className="nafe-mono" style={{ color: "#1d9bf0", fontSize: 11 }}>@NAFEOFFICIEL</span>
+        <span className="nafe-mono" style={{ opacity: 0.4, fontSize: 11, marginLeft: "auto" }}>{date}</span>
+      </div>
+      <div className="nafe-news__cardBody" style={{ flex: 1 }}>
+        <p className="nafe-news__cardLede" style={{ fontSize: 14, lineHeight: 1.65, color: "rgba(255,255,255,0.88)" }}>
+          {tweet.text}
+        </p>
+        <div className="nafe-news__cardFoot" style={{ marginTop: "auto" }}>
+          <span className="nafe-mono" style={{ opacity: 0.5, fontSize: 11 }}>♥ {likes} · ↺ {rts}</span>
+          <span className="nafe-mono" style={{ color: "#1d9bf0", fontSize: 11 }}>Voir →</span>
+        </div>
+      </div>
+    </a>
+  );
+}
 
 function NewsPage({ accent }) {
   window.store.useVersion();
   const all = window.store.news.list()
     .slice()
     .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-  const [cat, setCat] = useNewsState("Tout");
-  const filtered = cat === "Tout" ? all : all.filter(n => n.cat === cat);
-  const featured = filtered.find(n => n.featured) || filtered[0];
-  const rest = filtered.filter(n => (featured ? n.id !== featured.id : true));
+
+  const [cat, setCat]             = useNewsState("Tout");
+  const [tweets, setTweets]       = useNewsState([]);
+  const [tweetsErr, setTweetsErr] = useNewsState(false);
+
+  useNewsEffect(() => {
+    fetch(TWEETS_API)
+      .then(r => r.json())
+      .then(d => setTweets(d.tweets || []))
+      .catch(() => setTweetsErr(true));
+  }, []);
+
+  const showTweets = (cat === "Tout" || cat === "Twitter") && tweets.length > 0;
+  const filtered   = cat === "Tout" || cat === "Twitter"
+    ? all
+    : all.filter(n => n.cat === cat);
+  const featured   = cat !== "Twitter" && (filtered.find(n => n.featured) || filtered[0]);
+  const rest       = cat !== "Twitter" ? filtered.filter(n => (featured ? n.id !== featured.id : true)) : [];
+
+  const hasContent = all.length > 0 || tweets.length > 0;
 
   return (
     <div className="nafe-page">
@@ -27,7 +74,7 @@ function NewsPage({ accent }) {
         </p>
       </section>
 
-      {all.length === 0 ? (
+      {!hasContent ? (
         <div className="nafe-empty nafe-empty--panel">
           <span className="nafe-mono" style={{ color: accent }}>AUCUN ARTICLE</span>
           <p className="nafe-empty__text">
@@ -49,11 +96,16 @@ function NewsPage({ accent }) {
               <button
                 key={c}
                 className={`nafe-news__chip ${cat === c ? "is-active" : ""}`}
-                style={cat === c ? { background: accent, color: "#fff", borderColor: accent } : {}}
+                style={cat === c
+                  ? { background: c === "Twitter" ? "#1d9bf0" : accent, color: "#fff", borderColor: c === "Twitter" ? "#1d9bf0" : accent }
+                  : {}}
                 onClick={() => setCat(c)}
               >
                 <span className="nafe-mono">{c.toUpperCase()}</span>
-                {c !== "Tout" && (
+                {c === "Twitter" && tweets.length > 0 && (
+                  <span className="nafe-news__chipN nafe-mono">{tweets.length}</span>
+                )}
+                {c !== "Tout" && c !== "Twitter" && (
                   <span className="nafe-news__chipN nafe-mono">
                     {all.filter(n => n.cat === c).length}
                   </span>
@@ -62,86 +114,94 @@ function NewsPage({ accent }) {
             ))}
           </section>
 
-          {/* Featured article */}
-          {featured && (
-            <section className="nafe-news__featured nafe-clip-card">
-              <div className="nafe-news__featImg" style={{ borderColor: accent }}>
-                <FeaturedPlaceholder accent={accent} seed={featured.id} />
-                <span className="nafe-news__featTag" style={{ background: accent }}>À LA UNE</span>
-              </div>
-              <div className="nafe-news__featBody">
-                <div className="nafe-news__meta">
-                  <span className="nafe-mono" style={{ color: accent }}>{(featured.cat || "").toUpperCase()}</span>
-                  <span className="nafe-mono">· {featured.game}</span>
-                  <span className="nafe-mono">· {featured.date}</span>
+          {/* Tweets */}
+          {showTweets && (
+            <section className="nafe-section" style={{ marginTop: 48 }}>
+              <header className="nafe-section__head" style={{ marginBottom: 24 }}>
+                <div>
+                  <span className="nafe-eyebrow" style={{ color: "#1d9bf0" }}>X · @NafeOfficiel</span>
+                  <h2 className="nafe-display nafe-section__title">Derniers tweets</h2>
                 </div>
-                <h2 className="nafe-display nafe-news__featTitle">{featured.title}</h2>
-                <p className="nafe-news__featLede">{featured.lede}</p>
-                <div className="nafe-news__featFoot">
-                  <span className="nafe-mono">PAR {(featured.author || "").toUpperCase()}</span>
-                  <span className="nafe-mono">{(featured.readTime || "").toUpperCase()}</span>
-                  <span className="nafe-news__featRead" style={{ color: accent }}>LIRE →</span>
-                </div>
+                <a
+                  href="https://x.com/NafeOfficiel"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="nafe-mono"
+                  style={{ color: "#1d9bf0", fontSize: 12, opacity: 0.85 }}
+                >
+                  VOIR LE PROFIL →
+                </a>
+              </header>
+              <div className="nafe-news__grid">
+                {tweets.map(t => <TweetCard key={t.id} tweet={t} />)}
               </div>
             </section>
           )}
 
-          {/* Grid of articles */}
-          {rest.length > 0 && (
-            <section className="nafe-section" style={{ marginTop: 60 }}>
-              <header className="nafe-section__head">
-                <div>
-                  <span className="nafe-eyebrow">{cat === "Tout" ? "Toutes les dépêches" : cat}</span>
-                  <h2 className="nafe-display nafe-section__title">Archive</h2>
-                </div>
-                <span className="nafe-mono nafe-section__count">
-                  {String(rest.length).padStart(2, "0")} ARTICLE{rest.length > 1 ? "S" : ""}
-                </span>
-              </header>
-              <div className="nafe-news__grid">
-                {rest.map((n) => (
-                  <article key={n.id} className="nafe-news__card">
-                    <div className="nafe-news__cardImg">
-                      <ArticlePlaceholder accent={accent} seed={n.id} />
+          {/* Articles — masqués si filtre Twitter actif */}
+          {cat !== "Twitter" && all.length > 0 && (
+            <>
+              {featured && (
+                <section className="nafe-news__featured nafe-clip-card" style={{ marginTop: showTweets ? 60 : 0 }}>
+                  <div className="nafe-news__featImg" style={{ borderColor: accent }}>
+                    <FeaturedPlaceholder accent={accent} seed={featured.id} />
+                    <span className="nafe-news__featTag" style={{ background: accent }}>À LA UNE</span>
+                  </div>
+                  <div className="nafe-news__featBody">
+                    <div className="nafe-news__meta">
+                      <span className="nafe-mono" style={{ color: accent }}>{(featured.cat || "").toUpperCase()}</span>
+                      <span className="nafe-mono">· {featured.game}</span>
+                      <span className="nafe-mono">· {featured.date}</span>
                     </div>
-                    <div className="nafe-news__cardBody">
-                      <div className="nafe-news__meta">
-                        <span className="nafe-mono" style={{ color: accent }}>{(n.cat || "").toUpperCase()}</span>
-                        <span className="nafe-mono">· {n.date}</span>
-                      </div>
-                      <h3 className="nafe-display nafe-news__cardTitle">{n.title}</h3>
-                      <p className="nafe-news__cardLede">{n.lede}</p>
-                      <div className="nafe-news__cardFoot">
-                        <span className="nafe-mono">{n.game} · {n.readTime}</span>
-                        <span className="nafe-mono" style={{ color: accent }}>→</span>
-                      </div>
+                    <h2 className="nafe-display nafe-news__featTitle">{featured.title}</h2>
+                    <p className="nafe-news__featLede">{featured.lede}</p>
+                    <div className="nafe-news__featFoot">
+                      <span className="nafe-mono">PAR {(featured.author || "").toUpperCase()}</span>
+                      <span className="nafe-mono">{(featured.readTime || "").toUpperCase()}</span>
+                      <span className="nafe-news__featRead" style={{ color: accent }}>LIRE →</span>
                     </div>
-                  </article>
-                ))}
-              </div>
-            </section>
+                  </div>
+                </section>
+              )}
+
+              {rest.length > 0 && (
+                <section className="nafe-section" style={{ marginTop: 60 }}>
+                  <header className="nafe-section__head">
+                    <div>
+                      <span className="nafe-eyebrow">{cat === "Tout" ? "Toutes les dépêches" : cat}</span>
+                      <h2 className="nafe-display nafe-section__title">Archive</h2>
+                    </div>
+                    <span className="nafe-mono nafe-section__count">
+                      {String(rest.length).padStart(2, "0")} ARTICLE{rest.length > 1 ? "S" : ""}
+                    </span>
+                  </header>
+                  <div className="nafe-news__grid">
+                    {rest.map((n) => (
+                      <article key={n.id} className="nafe-news__card">
+                        <div className="nafe-news__cardImg">
+                          <ArticlePlaceholder accent={accent} seed={n.id} />
+                        </div>
+                        <div className="nafe-news__cardBody">
+                          <div className="nafe-news__meta">
+                            <span className="nafe-mono" style={{ color: accent }}>{(n.cat || "").toUpperCase()}</span>
+                            <span className="nafe-mono">· {n.date}</span>
+                          </div>
+                          <h3 className="nafe-display nafe-news__cardTitle">{n.title}</h3>
+                          <p className="nafe-news__cardLede">{n.lede}</p>
+                          <div className="nafe-news__cardFoot">
+                            <span className="nafe-mono">{n.game} · {n.readTime}</span>
+                            <span className="nafe-mono" style={{ color: accent }}>→</span>
+                          </div>
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+                </section>
+              )}
+            </>
           )}
         </>
       )}
-
-      {/* Newsletter CTA */}
-      <section className="nafe-news__newsletter nafe-clip-card">
-        <div>
-          <span className="nafe-eyebrow" style={{ color: accent }}>Briefing hebdo</span>
-          <h3 className="nafe-display nafe-news__nlTitle">
-            Chaque lundi, 7 minutes de lecture.
-          </h3>
-          <p className="nafe-news__nlLede">
-            Les résultats, les rumeurs, les drops à venir — directement dans ta boîte.
-          </p>
-        </div>
-        <div className="nafe-news__nlForm">
-          <input placeholder="ton@email.fr" />
-          <button className="nafe-btn nafe-btn--accent" style={{ background: accent }}>
-            S'abonner
-          </button>
-        </div>
-      </section>
     </div>
   );
 }
