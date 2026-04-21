@@ -2538,3 +2538,167 @@ a { color: inherit; text-decoration: none; }
   .nafe-social-hero { flex-direction: column; align-items: flex-start; }
   .nafe-socials-grid { grid-template-columns: 1fr; }
 }
+
+/* ---- Social card : état inactif (réseau non configuré) ---- */
+.nafe-social-card--inactive {
+  cursor: default;
+  pointer-events: none; /* non cliquable sauf bouton admin */
+}
+.nafe-social-card--inactive:hover { transform: none; background: rgba(255,255,255,0.02); }
+.nafe-social-card__handle--soon {
+  color: rgba(255,255,255,0.22) !important;
+  font-style: italic;
+  font-size: 13px !important;
+}
+
+/* ---- Bouton admin rapide (✎ / +) sur carte ---- */
+.nafe-social-card { position: relative; }
+.nafe-social-card--inactive { pointer-events: auto; } /* réactiver pour le bouton + */
+.nafe-social-card__admin-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.5);
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background 0.15s, color 0.15s;
+  line-height: 1;
+}
+.nafe-social-card__admin-btn:hover { background: rgba(255,255,255,0.12); }
+
+/* ---- Mode édition inline d'une carte ---- */
+.nafe-social-card--editing {
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 14px;
+  cursor: default;
+}
+.nafe-social-card--editing:hover { transform: none; }
+.nafe-social-card__edit-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+.nafe-social-card__input {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: #fff;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 6px 10px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.nafe-social-card__input:focus { border-color: var(--accent); }
+.nafe-social-card__input::placeholder { color: rgba(255,255,255,0.3); }
+.nafe-social-card__edit-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+/* ---- Post : toggle commentaires ---- */
+.nafe-post__toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.4);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background 0.15s, color 0.15s;
+}
+.nafe-post__toggle:hover { background: rgba(255,255,255,0.05); }
+
+/* ---- Section commentaires ---- */
+.nafe-comments {
+  border-top: 1px solid rgba(255,255,255,0.07);
+  margin-top: 6px;
+  padding-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.nafe-comment {
+  background: rgba(255,255,255,0.03);
+  border-left: 2px solid rgba(255,255,255,0.08);
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.nafe-comment__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.nafe-comment__author {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+}
+.nafe-comment__date {
+  font-size: 9px;
+  color: rgba(255,255,255,0.35);
+  letter-spacing: 0.1em;
+}
+.nafe-comment__content {
+  font-size: 13px;
+  color: rgba(255,255,255,0.75);
+  line-height: 1.5;
+  margin: 0;
+}
+.nafe-comment__empty {
+  font-size: 12px;
+  color: rgba(255,255,255,0.3);
+  font-style: italic;
+  margin: 0;
+}
+.nafe-post__del--sm {
+  width: 18px !important;
+  height: 18px !important;
+  font-size: 9px !important;
+  margin-left: auto;
+}
+
+/* ---- Formulaire de réponse inline ---- */
+.nafe-comment-form {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+.nafe-comment-form input {
+  flex: 1;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: #fff;
+  font-family: var(--font-body);
+  font-size: 13px;
+  padding: 8px 12px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.nafe-comment-form input:focus { border-color: var(--accent); }
+.nafe-comment-form input::placeholder { color: rgba(255,255,255,0.3); }
+
+/* ---- Login CTA dans commentaires ---- */
+.nafe-comment__login {
+  padding: 4px 0;
+}
+
+@media (max-width: 560px) {
+  .nafe-comment-form { flex-direction: column; }
+  .nafe-social-card--editing { flex-direction: column; }
+}

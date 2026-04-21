@@ -1,5 +1,7 @@
 // NAFE — Contact page : réseaux sociaux avec logos SVG
 
+const { useState: useSocState } = React;
+
 // Logos SVG officiels (simplifiés, viewBox 0 0 24 24)
 const PLATFORM_META = {
   discord: {
@@ -28,11 +30,14 @@ const PLATFORM_META = {
   },
 };
 
-function PlatformIcon({ platform, size = 32 }) {
+// Ordre d'affichage dans la grille
+const PLATFORM_ORDER = ["discord", "twitch", "youtube", "twitter", "instagram", "tiktok"];
+
+function PlatformIcon({ platform, size = 32, fill = "#fff" }) {
   const meta = PLATFORM_META[platform];
   if (!meta) return null;
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill={meta.color || "#fff"} aria-label={meta.name}>
+    <svg width={size} height={size} viewBox="0 0 24 24" fill={fill} aria-label={meta.name}>
       <path d={meta.path} />
     </svg>
   );
@@ -40,12 +45,45 @@ function PlatformIcon({ platform, size = 32 }) {
 
 function ContactPage({ accent }) {
   window.store.useVersion();
-  const links = window.store.socials.list();
+  const links   = window.store.socials.list();
   const isAdmin = window.store.isAdmin();
 
-  // Discord en hero si présent
-  const discordLink = links.find((l) => l.platform === "discord");
-  const otherLinks  = links.filter((l) => l.platform !== "discord");
+  const [editing, setEditing] = useSocState(null); // platform key en cours d'édition
+  const [form,    setForm]    = useSocState({ handle: "", url: "", description: "" });
+
+  // Map platform → entrée du store
+  const linkMap = {};
+  links.forEach((l) => { linkMap[l.platform] = l; });
+
+  function startEdit(platform) {
+    const existing = linkMap[platform];
+    setForm(existing
+      ? { handle: existing.handle || "", url: existing.url || "", description: existing.description || "" }
+      : { handle: "", url: "", description: "" }
+    );
+    setEditing(platform);
+  }
+
+  function saveLink(platform) {
+    const existing = linkMap[platform];
+    if (existing) {
+      window.store.socials.update(existing.id, { ...form });
+    } else {
+      window.store.socials.add({ platform, ...form });
+    }
+    setEditing(null);
+  }
+
+  function removeLink(platform) {
+    const existing = linkMap[platform];
+    if (existing && confirm(`Retirer ${PLATFORM_META[platform]?.name} ?`)) {
+      window.store.socials.remove(existing.id);
+      setEditing(null);
+    }
+  }
+
+  const discordLink = linkMap["discord"];
+  const activeCount = links.length;
 
   return (
     <div className="nafe-page">
@@ -60,98 +98,177 @@ function ContactPage({ accent }) {
         </p>
       </section>
 
-      {links.length === 0 ? (
+      {/* Carte Discord hero si configurée */}
+      {discordLink && (
         <section className="nafe-section">
-          <div className="nafe-empty nafe-empty--panel">
-            <span className="nafe-mono" style={{ color: accent }}>RÉSEAUX À VENIR</span>
-            <p className="nafe-empty__text">
-              {isAdmin
-                ? "Ajoute les liens de réseaux sociaux depuis l'espace admin (onglet Réseaux)."
-                : "Les liens vers nos réseaux sociaux seront disponibles très bientôt."}
-            </p>
-            {isAdmin && (
-              <a className="nafe-btn nafe-btn--ghost" href="#/admin/socials">→ Admin réseaux</a>
-            )}
+          <div
+            className="nafe-social-hero nafe-clip-card"
+            style={{ borderColor: PLATFORM_META.discord.color + "44", background: PLATFORM_META.discord.color + "12" }}
+          >
+            <div className="nafe-social-hero__icon" style={{ background: PLATFORM_META.discord.color }}>
+              <PlatformIcon platform="discord" size={40} />
+            </div>
+            <div className="nafe-social-hero__body">
+              <span className="nafe-mono nafe-social-hero__platform" style={{ color: PLATFORM_META.discord.color }}>DISCORD</span>
+              <h2 className="nafe-display nafe-social-hero__handle">{discordLink.handle}</h2>
+              {discordLink.description && <p className="nafe-social-hero__desc">{discordLink.description}</p>}
+            </div>
+            <a
+              className="nafe-btn nafe-btn--accent nafe-social-hero__cta"
+              style={{ background: PLATFORM_META.discord.color }}
+              href={discordLink.url}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {PLATFORM_META.discord.cta} →
+            </a>
           </div>
         </section>
-      ) : (
-        <>
-          {/* Carte Discord hero */}
-          {discordLink && (
-            <section className="nafe-section">
-              <div className="nafe-social-hero nafe-clip-card" style={{ borderColor: PLATFORM_META.discord.color + "44", background: PLATFORM_META.discord.color + "12" }}>
-                <div className="nafe-social-hero__icon" style={{ background: PLATFORM_META.discord.color }}>
-                  <PlatformIcon platform="discord" size={40} />
+      )}
+
+      {/* Grille complète — tous les réseaux, actifs ou à venir */}
+      <section className="nafe-section">
+        <header className="nafe-section__head">
+          <div>
+            <span className="nafe-eyebrow">Réseaux sociaux</span>
+            <h2 className="nafe-display nafe-section__title">Nous suivre</h2>
+          </div>
+          <span className="nafe-mono nafe-section__count">
+            {activeCount}/{PLATFORM_ORDER.length} EN LIGNE
+          </span>
+        </header>
+
+        <div className="nafe-socials-grid">
+          {PLATFORM_ORDER.map((platform) => {
+            const meta      = PLATFORM_META[platform];
+            const link      = linkMap[platform];
+            const iconColor = meta.color === "#fff" ? (meta.bg || "#333") : meta.color;
+            const isEditing = editing === platform;
+
+            /* ---- Mode édition inline (admin) ---- */
+            if (isEditing && isAdmin) {
+              return (
+                <div
+                  key={platform}
+                  className="nafe-social-card nafe-social-card--editing nafe-clip-card"
+                  style={{ borderColor: iconColor + "88" }}
+                >
+                  <div className="nafe-social-card__icon" style={{ background: meta.bg || meta.color }}>
+                    <PlatformIcon platform={platform} size={26} />
+                  </div>
+                  <div className="nafe-social-card__edit-body">
+                    <span className="nafe-mono" style={{ color: iconColor, fontSize: 9, letterSpacing: "0.15em" }}>
+                      {meta.name.toUpperCase()}
+                    </span>
+                    <input
+                      className="nafe-social-card__input"
+                      placeholder="@handle ou nom"
+                      value={form.handle}
+                      onChange={(e) => setForm((f) => ({ ...f, handle: e.target.value }))}
+                    />
+                    <input
+                      className="nafe-social-card__input"
+                      placeholder="https://..."
+                      value={form.url}
+                      onChange={(e) => setForm((f) => ({ ...f, url: e.target.value }))}
+                    />
+                    <input
+                      className="nafe-social-card__input"
+                      placeholder="Description (optionnel)"
+                      value={form.description}
+                      onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
+                    />
+                    <div className="nafe-social-card__edit-actions">
+                      <button
+                        className="nafe-btn nafe-btn--accent nafe-btn--sm"
+                        style={{ background: accent }}
+                        onClick={() => saveLink(platform)}
+                      >
+                        Sauver
+                      </button>
+                      {link && (
+                        <button
+                          className="nafe-btn nafe-btn--ghost nafe-btn--sm"
+                          onClick={() => removeLink(platform)}
+                        >
+                          Retirer
+                        </button>
+                      )}
+                      <button
+                        className="nafe-btn nafe-btn--ghost nafe-btn--sm"
+                        onClick={() => setEditing(null)}
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  </div>
                 </div>
-                <div className="nafe-social-hero__body">
-                  <span className="nafe-mono nafe-social-hero__platform" style={{ color: PLATFORM_META.discord.color }}>DISCORD</span>
-                  <h2 className="nafe-display nafe-social-hero__handle">{discordLink.handle}</h2>
-                  {discordLink.description && (
-                    <p className="nafe-social-hero__desc">{discordLink.description}</p>
+              );
+            }
+
+            /* ---- Carte normale (lien actif ou placeholder) ---- */
+            const Wrapper     = link ? "a" : "div";
+            const wrapperProps = link
+              ? { href: link.url, target: "_blank", rel: "noopener noreferrer" }
+              : {};
+
+            return (
+              <Wrapper
+                key={platform}
+                className={`nafe-social-card nafe-clip-card${!link ? " nafe-social-card--inactive" : ""}`}
+                style={{ borderColor: link ? iconColor + "44" : "rgba(255,255,255,0.06)" }}
+                {...wrapperProps}
+              >
+                <div
+                  className="nafe-social-card__icon"
+                  style={{ background: meta.bg || meta.color, opacity: link ? 1 : 0.3 }}
+                >
+                  <PlatformIcon platform={platform} size={26} />
+                </div>
+                <div className="nafe-social-card__body">
+                  <span
+                    className="nafe-mono nafe-social-card__platform"
+                    style={{ color: link ? iconColor : "rgba(255,255,255,0.2)" }}
+                  >
+                    {meta.name.toUpperCase()}
+                  </span>
+                  {link ? (
+                    <>
+                      <span className="nafe-social-card__handle">{link.handle}</span>
+                      {link.description && (
+                        <span className="nafe-social-card__desc">{link.description}</span>
+                      )}
+                    </>
+                  ) : (
+                    <span className="nafe-social-card__handle nafe-social-card__handle--soon">
+                      Bientôt disponible
+                    </span>
                   )}
                 </div>
-                <a
-                  className="nafe-btn nafe-btn--accent nafe-social-hero__cta"
-                  style={{ background: PLATFORM_META.discord.color }}
-                  href={discordLink.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {PLATFORM_META.discord.cta} →
-                </a>
-              </div>
-            </section>
-          )}
-
-          {/* Grille des autres réseaux */}
-          {otherLinks.length > 0 && (
-            <section className="nafe-section">
-              <header className="nafe-section__head">
-                <div>
-                  <span className="nafe-eyebrow">Réseaux sociaux</span>
-                  <h2 className="nafe-display nafe-section__title">Nous suivre</h2>
-                </div>
-              </header>
-              <div className="nafe-socials-grid">
-                {otherLinks.map((link) => {
-                  const meta = PLATFORM_META[link.platform] || { name: link.platform, color: accent, cta: "Visiter" };
-                  const iconColor = meta.color === "#fff" ? (meta.bg || "#333") : meta.color;
-                  return (
-                    <a
-                      key={link.id}
-                      className="nafe-social-card nafe-clip-card"
-                      href={link.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{ borderColor: iconColor + "44" }}
-                    >
-                      <div className="nafe-social-card__icon" style={{ background: meta.bg || meta.color }}>
-                        <PlatformIcon platform={link.platform} size={26} />
-                      </div>
-                      <div className="nafe-social-card__body">
-                        <span className="nafe-mono nafe-social-card__platform" style={{ color: iconColor }}>
-                          {meta.name.toUpperCase()}
-                        </span>
-                        <span className="nafe-social-card__handle">{link.handle}</span>
-                        {link.description && (
-                          <span className="nafe-social-card__desc">{link.description}</span>
-                        )}
-                      </div>
-                      <span className="nafe-mono nafe-social-card__cta" style={{ color: iconColor }}>
-                        {meta.cta} →
-                      </span>
-                    </a>
-                  );
-                })}
-              </div>
-            </section>
-          )}
-        </>
-      )}
+                {link && (
+                  <span className="nafe-mono nafe-social-card__cta" style={{ color: iconColor }}>
+                    {meta.cta} →
+                  </span>
+                )}
+                {isAdmin && (
+                  <button
+                    className="nafe-social-card__admin-btn"
+                    style={{ color: accent }}
+                    title={link ? "Modifier" : "Ajouter"}
+                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); startEdit(platform); }}
+                  >
+                    {link ? "✎" : "+"}
+                  </button>
+                )}
+              </Wrapper>
+            );
+          })}
+        </div>
+      </section>
     </div>
   );
 }
 
-window.ContactPage  = ContactPage;
-window.PlatformIcon = PlatformIcon;
+window.ContactPage   = ContactPage;
+window.PlatformIcon  = PlatformIcon;
 window.PLATFORM_META = PLATFORM_META;
